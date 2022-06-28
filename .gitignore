@@ -27,5 +27,4 @@ frontend/.vscode
 frontend/dist
 frontend/public/share
 .gitignore
-vite.config.js
 
