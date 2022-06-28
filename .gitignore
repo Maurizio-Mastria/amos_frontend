@@ -1,4 +1,4 @@
 frontend/node_modules
 frontend/.vscode
 frontend/dist
-frontend/public/share
+frontend/public/share/
