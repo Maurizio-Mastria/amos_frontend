@@ -229,7 +229,7 @@ export default{
                 link.click();
                                 
             }).catch((error)=>{
-                this.toast.error(error.response.data.detail)
+                this.toast.error(error.response.detail)
             })
         }
        
