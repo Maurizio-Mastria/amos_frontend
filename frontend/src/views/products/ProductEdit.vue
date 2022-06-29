@@ -619,7 +619,7 @@ export default{
                     this.marketplaces=res.data.results;
                     if(res.data.results.length>0){
                         this.marketplace=res.data.results[0];
-                        this.marketplaceImg="/src/assets/"+this.marketplace.code+".png"
+                        this.marketplaceImg="/imgs/"+this.marketplace.code+".png"
                     }
                     else{
                         this.marketplace=null;
@@ -681,7 +681,7 @@ export default{
                             for(var i=0; i<val.length;i++){
                                 if(key=="url_eav" && val[i].attribute.substr(0,5)=="image" && fields.includes(val[i].attribute)){
                                 
-                                    let url = "http://127.0.0.1:3000"+val[i].value+"?"+performance.now();
+                                    let url = val[i].value+"?"+performance.now();
                                     let attribute=val[i].attribute;
                                     this.axios.get(url, {responseType: 'blob'}).then((response) => {
                                         let reader = new FileReader();
@@ -764,7 +764,7 @@ export default{
                         for(var i=0;i<res.data.url_eav.length;i++){
                             if(res.data.url_eav[i].attribute.substr(0,5)=="image"){
                                 // console.log(res.data.url_eav[i].attribute)
-                                let url = "http://127.0.0.1:3000"+res.data.url_eav[i].value+"?"+performance.now();
+                                let url = res.data.url_eav[i].value+"?"+performance.now();
                                 let attribute=res.data.url_eav[i].attribute;
                                 this.axios.get(url, {responseType: 'blob'}).then((response) => {
                                     let reader = new FileReader();
@@ -801,7 +801,7 @@ export default{
         },
         changeMarketplace(index){
             this.marketplace=this.marketplaces[index]
-            this.marketplaceImg="/src/assets/"+this.marketplace.code+".png"
+            this.marketplaceImg="/imgs/"+this.marketplace.code+".png"
             // this.getProduct();
         },
         async getProducts(){

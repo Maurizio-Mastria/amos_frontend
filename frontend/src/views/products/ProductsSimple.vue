@@ -312,7 +312,7 @@ export default{
                     this.marketplaces=res.data.results;
                     if(res.data.results.length>0){
                         this.marketplace=res.data.results[0];
-                        this.marketplaceImg="/src/assets/"+this.marketplace.code+".png"
+                        this.marketplaceImg="/imgs/"+this.marketplace.code+".png"
                     }
                     else{
                         this.marketplace=null;
@@ -410,7 +410,7 @@ export default{
         },
         changeMarketplace(index){
             this.marketplace=this.marketplaces[index]
-            this.marketplaceImg="/src/assets/"+this.marketplace.code+".png"
+            this.marketplaceImg="/imgs/"+this.marketplace.code+".png"
             this.getProducts();
         },
         
