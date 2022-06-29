@@ -41,12 +41,14 @@
                             <h5 style="text-align:left;" class="mt-3 col-12 ">Bozza prodotto - <b>{{product.sku}}</b></h5>
                             <h5 style="text-align:left;" class="mt-3 col-12 mb-4">{{product.title}}</h5>
                         </div>
-                        <template v-if="this.prev || this.next">
-                        <div class="md-auto float-left"><a v-if="this.prev!=null" class="btn btn-warning mt-3" :href="'/products/edit?id='+this.prev+'&type=simple&marketplace='+this.marketplace.id"><i class="fa fa-arrow-left"></i></a></div>
-                        <div class="md-auto float-left mt-4"><b class="p-4"><i>Cambia prodotto</i></b></div>
-                        <div class="md-auto float-left"><a v-if="this.next!=null" class="btn btn-warning mt-3" :href="'/products/edit?id='+this.next+'&type=simple&marketplace='+this.marketplace.id"><i class="fa fa-arrow-right"></i></a></div>
+                        <template v-if="this.product.id">
+                            <template v-if="this.prev || this.next">
+                            <div class="md-auto float-left"><a v-if="this.prev!=null" class="btn btn-warning mt-3" :href="'/products/edit?id='+this.prev+'&type=simple&marketplace='+this.marketplace.id"><i class="fa fa-arrow-left"></i></a></div>
+                            <div class="md-auto float-left mt-4"><b class="p-4"><i>Cambia prodotto</i></b></div>
+                            <div class="md-auto float-left"><a v-if="this.next!=null" class="btn btn-warning mt-3" :href="'/products/edit?id='+this.next+'&type=simple&marketplace='+this.marketplace.id"><i class="fa fa-arrow-right"></i></a></div>
+                            </template>
+                            <template v-else><div class="md-auto float-left mt-3"><b class="p-4 writer"><i>Loading...</i></b></div></template>
                         </template>
-                        <template v-else><div class="md-auto float-left mt-3"><b class="p-4 writer"><i>Loading...</i></b></div></template>
                         <div class="md-auto float-right"><button class="btn btn-warning mt-3" v-on:click="saveProduct()">Salva bozza</button></div>
                     </div>
                     <div class="row col-12">
