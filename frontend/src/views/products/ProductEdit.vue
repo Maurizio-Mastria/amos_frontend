@@ -34,12 +34,12 @@
                     <div class="col-md-1"></div>
                 </div>
             </div>
-            <div class="center" v-if="marketplace" > 
+            <div class="center" v-if="marketplace"> 
                 <div class="container-fluid" >
                     <div class="col-12">
                         <div class="col-8  float-left">
-                            <h5 style="text-align:left;" class="mt-3 col-12 ">Bozza prodotto - <b>{{product.sku}}</b></h5>
-                            <h5 style="text-align:left;" class="mt-3 col-12 mb-4">{{product.title}}</h5>
+                            <h5 style="text-align:left;" class="mt-3 col-12 ">Scheda prodotto - <b>{{product.sku}}</b></h5>
+                            <h5 style="text-align:left;" class="mt-3 col-12 mb-4"><b>{{product.title}}</b></h5>
                         </div>
                         <template v-if="this.product.id">
                             <template v-if="this.prev || this.next">
@@ -171,23 +171,53 @@
                                         </div>
                                     </template>
                                     <template v-else>
-                                        <div class="col-12 p-2">
+                                        <div class="col-12 pr-2 pl-2">
                                             <div class="p-2 col-6 float-left" style="text-align:left"><RadioButton :ison.sync="!iHaveChilds" message="Crea nuovi prodotti figlio" @update:ison="iHaveChilds=!iHaveChilds"/></div>
                                             <div class="p-2 col-6 float-left" style="text-align:left"><RadioButton :ison.sync="iHaveChilds" message="Usa prodotti esistenti" @update:ison="iHaveChilds=!iHaveChilds"/></div>
                                         </div>
-                                        <div class="col-xl-12 p-2">
+                                        <div class="col-xl-12 pl-2 pr-2 mr-3 ml-3 mb-4" style="background:white; border:1px solid var(--warning); border-radius:4px;">
                                             <template v-if="!iHaveChilds">
                                             </template>
                                             <template v-else>
-                                                <div class="input-group-prepend">
-                                                    <div class="input-group-prepend mr-2">
-                                                        <span class="input-group-text" id="product_gtin" style="height:39px; min-width:200px;">Seleziona gli SKU figli</span>
+                                                <div class="row col-xl-12 pl-2 pr-2">
+
+                                                    <div class="col-12 p-2" style="text-align:left;">
+                                                        <div class="col-12 p-2"><b>Prodotti selezionati</b></div>
+                                                        <span class="m-1" v-for="(value,key) in abstract.childs_selected" :key="key"><span class="p-2 m-1" style="border-radius:5px; color:white; background:var(--warning);">{{value.sku}}</span><i class="p-2 fa fa-remove" style="cursor:pointer; position:relative; top:-15px; left:-15px; color:var(--danger);" v-on:click="removeChildSelected(key)"></i></span>
                                                     </div>
-                                                    <select class="custom-select mr-2" style="height:39px; min-width:150px;"  v-model="product.childs" >
+                                                    <div class="col-xl-10">
+                                                        <div class="input-group-prepend">
+                                                            <div class="input-group-prepend mr-2">
+                                                                <span class="input-group-text" id="product_gtin">Figli disponibili</span>
+                                                            </div>
+                                                            <select class="custom-select" data-live-search="true" v-model="s_child">
+                                                                <option v-for="(value,key) in abstract.childs_availables" :key="key" :value="value">{{value.sku}} - {{value.title}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-2 m-auto">
+                                                        <button class="btn btn-warning" :disabled="s_child==null" v-on:click="addChildSelected()">Aggiungi</button>
+                                                    </div>
+                                                </div>
+                                                <hr/>
+                                                <div class="row col-xl-12 p-2">
+                                                    <div class="col-12 p-2" style="text-align:left;">
+                                                        <span class="m-1" v-for="(value,key) in abstract.variations_selected" :key="key"><span class="p-2 m-1" style="border-radius:5px; color:white; background:var(--warning);">{{value.description}}</span><i class="p-2 fa fa-remove" style="cursor:pointer; position:relative; top:-15px; left:-15px; color:var(--danger);" v-on:click="removeVariationSelected(key)"></i></span>
+                                                    </div>
+                                                <div class="col-xl-10">
+                                                    <div class="input-group-prepend">
+                                                        <div class="input-group-prepend mr-2">
+                                                            <span class="input-group-text" id="product_gtin">Varianti disponibili</span>
+                                                        </div>
                                                         
-                                                        
-                                                    </select>
-                                                    
+                                                    <select class="custom-select" data-live-search="true" v-model="s_variation">
+                                                            <option v-for="(value,key) in abstract.variations_availables" :key="key" :value="value">{{value.description}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-2 m-auto">
+                                                    <button class="btn btn-warning" :disabled="s_variation==null" v-on:click="addVariationSelected()" >Aggiungi</button>
+                                                </div>
                                                 </div>
                                             </template>
                                         </div>
@@ -430,11 +460,14 @@ function initialState (){
                 id:null,
             },
             abstract:{
-                childs_selected:{},
-                variations_selected:{},
-                childs_availables:{},
-                variations_availables:{},
+                childs_selected:[],
+                variations_selected:[],
+                childs_availables:[],
+                variations_availables:[],
             },
+            
+            s_child:null,
+            s_variation:null,
 
             productImages:{
                 image0:null,
@@ -590,7 +623,9 @@ export default{
 
 
         goToProduct(id){
-            this.$router.push("/products/edit?id="+id+"&type=simple&marketplace="+this.marketplace.id);            
+            
+            window.location.href="/products/edit?id="+id+"&type=simple&marketplace="+this.marketplace.id;
+
         },
 
 
@@ -620,7 +655,16 @@ export default{
                     const res = await this.axios.get("/api/marketplaces/?company="+this.company.id)
                     this.marketplaces=res.data.results;
                     if(res.data.results.length>0){
-                        this.marketplace=res.data.results[0];
+                        if(this.$route.query.marketplace!=null){
+                            for(var i=0; i<res.data.results.length;i++){
+                                if(res.data.results[i].id==this.$route.query.marketplace){
+                                    this.marketplace=res.data.results[i];
+                                }
+                            }
+                        }
+                        else{
+                            this.marketplace=res.data.results[0];
+                        }
                         this.marketplaceImg="/imgs/"+this.marketplace.code+".png"
                     }
                     else{
@@ -633,17 +677,41 @@ export default{
                 }  
             }
         },
-        
-        async getAbstractVariations() {
+        selectProductType(type){
+            if(type=="C"){
+                this.postAbstractVariations();
+            }
+        },
+
+        addChildSelected(){
+            this.abstract.childs_selected.push(this.s_child);
+            this.s_child=null;
+            this.s_variation=null;
+            this.postAbstractVariations()
+        },
+        removeChildSelected(index){
+            this.abstract.childs_selected.splice(index,1);
+            this.postAbstractVariations();
+        },
+        addVariationSelected(){
+            this.abstract.variations_selected.push(this.s_variation);
+            this.s_variation=null;
+            this.s_child=null;
+            this.postAbstractVariations()
+        },
+        removeVariationSelected(index){
+            this.abstract.variations_selected.splice(index,1);
+            this.postAbstractVariations();
+        },
+        postAbstractVariations() {
             if(this.marketplace!==null){
-                try{
-                    const res = await this.axios.get("/api/abstract/variations/?company="+this.company.id+"&marketplace="+this.marketplace.id).then((res) => {
-                        this.abstract=res.data.results;
-                    })
-                }
-                catch{
+                const objdata={"childs":this.abstract.childs_selected,"variations":this.abstract.variations_selected}
+                this.axios.post("/api/abstract/variations/?company="+this.company.id+"&marketplace="+this.marketplace.id,objdata).then((res) => {
+                    this.abstract=res.data.results;
+                }).catch((error)=>{
                     this.toast.error("Errore indefinito");    
-                }
+                });
+                
             }
             
         },
@@ -742,6 +810,7 @@ export default{
             if(this.$route.query.id!=null && productType.includes(this.$route.query.type)){
                 
                 this.axios.get("/api/products/"+this.$route.query.type+"/"+this.$route.query.id+"/?company="+this.company.id+"&marketplace="+this.marketplace.id).then((res)=>{
+                        
                         if(this.product.gtin_type=="NOGTIN"){
                             this.product.gtin_type=null;
                             this.product.gtin=null;
@@ -804,11 +873,13 @@ export default{
         changeMarketplace(index){
             this.marketplace=this.marketplaces[index]
             this.marketplaceImg="/imgs/"+this.marketplace.code+".png"
-            // this.getProduct();
+            this.goToProduct(this.product.id);
         },
         async getProducts(){
+            
             if(this.marketplace!==null && this.$route.query.id){
-                this.axios.get("/api/products/simple/?company="+this.company.id+"&marketplace="+this.marketplace.id).then((res) => {
+                
+                this.axios.get("/api/abstract/products/?type=S&company="+this.company.id+"&marketplace="+this.marketplace.id).then((res) => {
                     var prev=null;
                     var next=null;
                     for(var i=0; i<res.data.results.length; i++){

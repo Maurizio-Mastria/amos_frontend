@@ -41,9 +41,9 @@
                         
                             <div class="row mt-4 pt-4">
                                 <div class="col-3" style="text-align:left"><a href="#" v-on:click="selectAllProducts(true)" style="color:var(--warning);"><i><b>Seleziona tutti</b></i></a><a href="#" v-on:click="selectAllProducts(false)" style="color:var(--warning);"><b><i> / </i></b><i><b>Deseleziona tutti</b></i></a></div>
-                                <div class="col-6" style="font-size:20px;"><a style="color:var(--warning)" v-if="this.page>1" href="#" v-on:click="this.page--; this.getProducts()">&lt;&lt;</a><b class="writer m-2">Pagina {{this.page}} </b><a style="color:var(--warning)" href="#" v-on:click="this.page++; this.getProducts()">&gt;&gt;</a></div>
+                                <div class="col-6" style="font-size:20px;"><a style="color:var(--warning)" v-if="this.previous" href="#" v-on:click="this.page--; this.getProducts()">&lt;&lt;</a><b class="writer m-2">Pagina {{this.page}} </b><a style="color:var(--warning)" href="#" v-if="this.next" v-on:click="this.page++; this.getProducts()">&gt;&gt;</a></div>
                                 <div class="col-3" style="text-align:right"><label >Visualizza prodotti</label>
-                                    <select class="custom-select mb-2" v-on:change="this.page=1; this.count=$event.target.value; this.getProducts();">
+                                    <select class="custom-select mb-2" v-on:change="this.page=1; this.limit=$event.target.value; this.getProducts();">
                                         <option value="20">20</option>
                                         <option value="50">50</option>
                                         <option value="100">100</option>
@@ -257,8 +257,8 @@ function initialState (){
             checkboxAllMarketplace:true,
             checkboxMarketplace:{},
 
-            count:20,
-            
+            count:null,
+            limit:20,
             page:1,
             
 
@@ -342,11 +342,21 @@ export default{
                 }
             
             try{
-                const res = await this.axios.get("/api/products/simple/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&page="+this.page+"&limit="+this.count+querystring).then((res) => {
+                const res = await this.axios.get("/api/products/simple/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&page="+this.page+"&limit="+this.limit+querystring).then((res) => {
                     this.products=[]
                     for(var i=0; i<res.data.results.length; i++){
-                        this.next=res.data.next;
-                        this.previous=res.data.previous;
+                        if(res.data.next){
+                            this.next=this.page+1;
+                        }
+                        else{
+                            this.next=false;
+                        }
+                        if(res.data.previous){
+                            this.previous=this.page-1;
+                        }
+                        else{
+                            this.previous=false;
+                        }
                         this.count=res.data.count;
                         var obj=res.data.results[i];
                         var product = {
