@@ -13458,12 +13458,14 @@ select.selectpicker {
     color:var(--success) !important;
 }
 .nav-link-success:hover{
-    color:white !important;
-    background-color: var(--success) !important;
+    color:var(--success) !important;
+    background-color: #fff !important;
+    border-color: var(--success) var(--info) #fff !important;
 }
 .nav-link-success.active{
-    color:white !important;
-    background-color: var(--success) !important;
+    color:var(--success) !important;
+    background-color: #fff !important;
+    border-color: var(--success) var(--info) #fff !important;
 }
 
 .nav-link-danger{

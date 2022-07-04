@@ -23,7 +23,7 @@
                         </a>
                         <div class="collapse " id="products" style="height: auto;">
                             <ul class="nav">
-                                <li class="nav-item"><router-link to="/products/edit"  class="nav-link"><template v-if="child=='new'"><b>Nuovo</b></template><template v-else>Nuovo</template></router-link></li>
+                                <li class="nav-item"><a href="/products/edit" class="nav-link"><template v-if="child=='new'"><b>Nuovo</b></template><template v-else>Nuovo</template></a></li>
                                 <li class="nav-item"><router-link to="/products/simple"  class="nav-link"><template v-if="child=='simple'"><b>Semplici</b></template><template v-else>Semplici</template></router-link></li>
                                 <li class="nav-item"><router-link to="/products/configurable"  class="nav-link"><template v-if="child=='configurable'"><b>Configurabili</b></template><template v-else>Configurabili</template></router-link></li>
                                 <li class="nav-item"><router-link to="/products/multiple"  class="nav-link" ><template v-if="child=='multiple'"><b>Multipli</b></template><template v-else>Multipli</template></router-link></li>

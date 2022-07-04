@@ -6,9 +6,9 @@
             <div class="top" style="border-bottom:1px solid var(--warning)" v-if="marketplace">
                 <div class="row">
                     <div class="col-md-8" v-if="marketplace" style="text-align:left">
-                        <div class="p-2">
-                            <img class="p-1 me-2 thumbnails" :src="marketplaceImg" />
-                            <b>{{marketplace._code}} {{marketplace._country}}</b>
+                        <div class="pb-3">
+                            <img class="mb-2 ml-2 p-1 me-2 thumbnails" :src="marketplaceImg" />
+                            <b class="writer ml-2" style="font-size:35px;">{{marketplace._code}} {{marketplace._country}}</b>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -58,6 +58,9 @@
                                     <a v-on:click="tab='general'" class="nav-link nav-link-info" :class="{ 'active' : tab=='general'}" id="general-tab" href="#" role="tab" ><b>Generale</b></a>
                                 </li>
                                 <li class="nav-item">
+                                    <a v-on:click="tab='descriptions'" class="nav-link nav-link-success" :class="{ 'active' : tab=='descriptions'}" id="descriptions-tab" href="#" role="tab" ><b>Descrizioni</b></a>
+                                </li>
+                                <li class="nav-item">
                                     <a v-on:click="tab='seo'" class="nav-link nav-link-warning" :class="{ 'active' : tab=='seo'}" id="seo-tab" href="#" role="tab" ><b>SEO</b></a>
                                 </li>                                
                             </ul>
@@ -66,195 +69,233 @@
                         <div class="tab-content" id="tabContent" style="height:500px; overflow-y:scroll">
                             <div class="tab-pane fade show" :class="{ 'active' : tab=='general'}" role="tabpanel" aria-labelledby="general-tab">
                                 <div class="col-12 row">
-                        
-                         <div class="input-group col-xl-5 col-12" style="display:block;">
-                            <div class="mb-4" style="min-width:100%; height:300px; min-height:300px; max-height: 300px;">
-                                <h6>Immagine principale</h6>
-                            
-                                <div class="mb-1 drop" :class="getClasses0" @dragover.prevent="dragOver(0)" @dragleave.prevent="dragLeave(0)" @drop.prevent="drop($event,0)" style="width:100%; height:90%;">
-                                    <img :src="productImages.image0" v-if="productImages.image0" style="width:95%; height:95%; overflow:hidden;"/>
-                                    <h1 v-if="image0.wrongFile">File immagine sbagliato o corrotto</h1>
-                                    <svg v-if="image0.wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                                    <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
-                                    </svg>
-                                    <img v-if="!productImages.image0 && !image0.isDragging && !image0.wrongFile" src="/src/assets/img/uploads/yellow.png"/>
-                                </div>
-                                <div><button v-on:click="delImages(0)" class="btn btn-danger float-left p-1" ><i class="fa fa-trash"></i></button><button class="btn btn-warning float-right p-1 " v-on:click="moveImage(0,'right')"><i class="fa fa-arrow-right"></i></button></div>
-                            </div>
-                            <div>
-                                
-                                <div class="col-12 mx-auto">
-                                    <div class="input-group">
-                                        <div v-for="i in (1,8)" class="p-3">
-                                            <template v-if="i<8">Immagine {{i}}</template><template v-else>Swatch Image</template>
-                                                <div class="drop" :class="this['getClasses'+i]" @dragover.prevent="dragOver(i)" @dragleave.prevent="dragLeave(i)" @drop.prevent="drop($event,i)" style="width:100px;height:100px;">
-                                                    <img :src="productImages['image'+i]" v-if="productImages['image'+i]"/>
-                                                    <h1 v-if="this['image'+i].wrongFile">File immagine sbagliato o corrotto</h1>
-                                                    <svg v-if="this['image'+i].wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-                                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                                                    <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
-                                                    </svg>
-                                                    <template v-if="!productImages['image'+i] && !this['image'+i].isDragging && !this['image'+i].wrongFile">
-                                                        <img v-if="i<8"  src="/src/assets/img/uploads/blue.png"/>
-                                                        <img v-else  src="/src/assets/img/uploads/violet.png"/>
-                                                    </template>
-                                                </div>
-                                                <div class="pt-1">
-                                                    <button class="btn btn-danger float-left p-0" v-on:click="delImages(i)"><i class="fa fa-trash"></i></button>
-                                                    <button class="btn btn-warning float-right p-0"  v-on:click="moveImage(i,'right')" v-if="i<8"><i  class="fa fa-arrow-right"></i></button>
-                                                    <button class="btn btn-warning float-right p-0 mr-2"  v-on:click="moveImage(i,'left')"><i class="fa fa-arrow-left"></i></button>
-                                                </div>
+                                    <div class="input-group col-xl-5 col-12" style="display:block;">
+                                        <div class="mb-4" style="min-width:100%; height:300px; min-height:300px; max-height: 300px;">
+                                            <h6>Immagine principale</h6>
+                                        
+                                            <div class="mb-1 drop" :class="getClasses0" @dragover.prevent="dragOver(0)" @dragleave.prevent="dragLeave(0)" @drop.prevent="drop($event,0)" style="width:100%; height:90%;">
+                                                <img :src="productImages.image0" v-if="productImages.image0" style="width:95%; height:95%; overflow:hidden;"/>
+                                                <h1 v-if="image0.wrongFile">File immagine sbagliato o corrotto</h1>
+                                                <svg v-if="image0.wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                                <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
+                                                </svg>
+                                                <img v-if="!productImages.image0 && !image0.isDragging && !image0.wrongFile" src="/src/assets/img/uploads/yellow.png"/>
+                                            </div>
+                                            <div><button v-on:click="delImages(0)" class="btn btn-danger float-left p-1" ><i class="fa fa-trash"></i></button><button class="btn btn-warning float-right p-1 " v-on:click="moveImage(0,'right')"><i class="fa fa-arrow-right"></i></button></div>
                                         </div>
-
-
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="col-xl-7 col-sm-12">
-                            <div class="row">
-                                <div class="col-xl-6 col-12">
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend mr-2" >
-                                            <span class="input-group-text" style="min-width:200px;" id="product_type">Tipo prodotto</span>
-                                        </div>
-                                        <select style="font-weight:bold;" class="custom-select" aria-label="Tipo prodotto"  aria-describedby="product_type" :disabled="product.id" v-model="product.type" v-on:change="selectProductType($event.target.value)">
-                                            <option value="S">Semplice</option>
-                                            <option value="C">Configurabile</option>
-                                            <option value="M">Multiplo</option>
-                                            <option value="B">Misto</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-xl-6 col-12">
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend mr-2">
-                                            <span class="input-group-text" id="product_sku" style="min-width:100px;">SKU</span>
-                                        </div>
-                                        <input class="form-control" style="font-weight:bold;" :disabled="product.id" type="text" v-model="product.sku">
-                                    </div>
-                                </div>
-                                <div class="col-xl-8 col-12">
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend mr-2">
-                                            <span class="input-group-text" id="product_title" style="min-width:100px;">Titolo</span>
-                                        </div>
-                                        <input class="form-control" style="font-weight:bold;" type="text" v-model="product.title">
-                                    </div>
-                                </div>
-                                <div class="col-xl-4">
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend mr-2">
-                                            <span class="input-group-text" id="product_brand" style="min-width:100px;">Brand</span>
-                                        </div>
-                                        <input class="form-control" style="font-weight:bold;" type="text" v-model="product.brand">
-                                    </div>
-                                </div>
-                            
-                                <div class="col-12 row">
-                                    <template v-if="product.type!='C'">
-                                        <div class="col-12 input-group mb-3">
-                                            <div class="input-group-prepend">
-                                                <div class="input-group-prepend mr-2">
-                                                    <span class="input-group-text" id="product_gtin" style="height:39px; min-width:200px;">GTIN</span>
-                                                </div>
-                                                
-                                                <select class="custom-select mr-2" style="font-weight:bold !important; height:39px; min-width:150px;"  v-model="product.gtin_type" :disabled="gtinIsOn">
-                                                    <option value="EAN">EAN</option>
-                                                    <option value="ISBN">ISBN</option>
-                                                </select>
-                                                <input class="form-control mr-2" type="text" style=" min-width:300px;" v-model="product.gtin" :disabled="gtinIsOn">
-                                                <span class="p-2"><CheckboxButton :ison.sync="gtinIsOn" @update:ison="(n) => gtinIsOn=n"/></span><span class="p-2"><b v-if="gtinIsOn" style="color:var(--info);">Esente</b><b v-else style="color:grey;">Esente</b></span>
+                                    <div>
+                                    <div class="col-12 mx-auto">
+                                        <div class="input-group">
+                                            <div v-for="i in (1,8)" class="p-3">
+                                                <template v-if="i<8">Immagine {{i}}</template><template v-else>Swatch Image</template>
+                                                    <div class="drop" :class="this['getClasses'+i]" @dragover.prevent="dragOver(i)" @dragleave.prevent="dragLeave(i)" @drop.prevent="drop($event,i)" style="width:100px;height:100px;">
+                                                        <img :src="productImages['image'+i]" v-if="productImages['image'+i]"/>
+                                                        <h1 v-if="this['image'+i].wrongFile">File immagine sbagliato o corrotto</h1>
+                                                        <svg v-if="this['image'+i].wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                                                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                                        <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
+                                                        </svg>
+                                                        <template v-if="!productImages['image'+i] && !this['image'+i].isDragging && !this['image'+i].wrongFile">
+                                                            <img v-if="i<8"  src="/src/assets/img/uploads/blue.png"/>
+                                                            <img v-else  src="/src/assets/img/uploads/violet.png"/>
+                                                        </template>
+                                                    </div>
+                                                    <div class="pt-1">
+                                                        <button class="btn btn-danger float-left p-0" v-on:click="delImages(i)"><i class="fa fa-trash"></i></button>
+                                                        <button class="btn btn-warning float-right p-0"  v-on:click="moveImage(i,'right')" v-if="i<8"><i  class="fa fa-arrow-right"></i></button>
+                                                        <button class="btn btn-warning float-right p-0 mr-2"  v-on:click="moveImage(i,'left')"><i class="fa fa-arrow-left"></i></button>
+                                                    </div>
                                             </div>
                                         </div>
-                                    </template>
-                                    <template v-else>
-                                        <div class="col-12 pr-2 pl-2">
-                                            <div class="p-2 col-6 float-left" style="text-align:left"><RadioButton :ison.sync="!iHaveChilds" message="Crea nuovi prodotti figlio" @update:ison="iHaveChilds=!iHaveChilds"/></div>
-                                            <div class="p-2 col-6 float-left" style="text-align:left"><RadioButton :ison.sync="iHaveChilds" message="Usa prodotti esistenti" @update:ison="iHaveChilds=!iHaveChilds"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-7 col-sm-12">
+                                <div class="row">
+                                    <div class="col-xl-6 col-12">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend mr-2" >
+                                                <span class="input-group-text" style="min-width:200px;" id="product_type">Tipo prodotto</span>
+                                            </div>
+                                            <select style="font-weight:bold;" class="custom-select" aria-label="Tipo prodotto"  aria-describedby="product_type" :disabled="product.id" v-model="product.type" v-on:change="selectProductType($event.target.value)">
+                                                <option value="S">Semplice</option>
+                                                <option value="C">Configurabile</option>
+                                                <option value="M">Multiplo</option>
+                                                <option value="B">Misto</option>
+                                            </select>
                                         </div>
-                                        <div class="col-xl-12 pl-2 pr-2 mr-3 ml-3 mb-4" style="background:white; border:1px solid var(--warning); border-radius:4px;">
-                                            <template v-if="!iHaveChilds">
-                                            </template>
-                                            <template v-else>
-                                                <div class="row col-xl-12 pl-2 pr-2">
-
-                                                    <div class="col-12 p-2" style="text-align:left;">
-                                                        <div class="col-12 p-2"><b>Prodotti selezionati</b></div>
-                                                        <span class="m-1" v-for="(value,key) in abstract.childs_selected" :key="key"><span class="p-2 m-1" style="border-radius:5px; color:white; background:var(--warning);">{{value.sku}}</span><i class="p-2 fa fa-remove" style="cursor:pointer; position:relative; top:-15px; left:-15px; color:var(--danger);" v-on:click="removeChildSelected(key)"></i></span>
+                                    </div>
+                                    <div class="col-xl-6 col-12">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend mr-2">
+                                                <span class="input-group-text" id="product_sku" style="min-width:100px;">SKU</span>
+                                            </div>
+                                            <input class="form-control" style="font-weight:bold;" :disabled="product.id" type="text" v-model="product.sku">
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-8 col-12">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend mr-2">
+                                                <span class="input-group-text" id="product_title" style="min-width:100px;">Titolo</span>
+                                            </div>
+                                            <input class="form-control" style="font-weight:bold;" type="text" v-model="product.title">
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend mr-2">
+                                                <span class="input-group-text" id="product_brand" style="min-width:100px;">Brand</span>
+                                            </div>
+                                            <input class="form-control" style="font-weight:bold;" type="text" v-model="product.brand">
+                                        </div>
+                                    </div>
+                                
+                                    <div class="col-12 row">
+                                        <template v-if="product.type!='C'">
+                                            <div class="col-12 input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <div class="input-group-prepend mr-2">
+                                                        <span class="input-group-text" id="product_gtin" style="height:39px; min-width:200px;">GTIN</span>
                                                     </div>
+                                                    
+                                                    <select class="custom-select mr-2" style="font-weight:bold !important; height:39px; min-width:150px;"  v-model="product.gtin_type" :disabled="gtinIsOn">
+                                                        <option value="EAN">EAN</option>
+                                                        <option value="ISBN">ISBN</option>
+                                                    </select>
+                                                    <input class="form-control mr-2" type="text" style=" min-width:300px;" v-model="product.gtin" :disabled="gtinIsOn">
+                                                    <span class="p-2"><CheckboxButton :ison.sync="gtinIsOn" @update:ison="(n) => gtinIsOn=n"/></span><span class="p-2"><b v-if="gtinIsOn" style="color:var(--info);">Esente</b><b v-else style="color:grey;">Esente</b></span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template v-else>
+                                            <div class="col-12 pr-2 pl-2">
+                                                <div class="p-2 col-6 float-left" style="text-align:left"><RadioButton :ison.sync="!iHaveChilds" message="Crea nuovi prodotti figlio" @update:ison="iHaveChilds=!iHaveChilds"/></div>
+                                                <div class="p-2 col-6 float-left" style="text-align:left"><RadioButton :ison.sync="iHaveChilds" message="Usa prodotti esistenti" @update:ison="iHaveChilds=!iHaveChilds"/></div>
+                                            </div>
+                                            <div class="col-xl-12 pl-2 pr-2 mr-3 ml-3 mb-4" style="background:white; border:1px solid var(--warning); border-radius:4px;">
+                                                <template v-if="!iHaveChilds">
+                                                </template>
+                                                <template v-else>
+                                                    <div class="row col-xl-12 pl-2 pr-2">
+
+                                                        <div class="col-12 p-2" style="text-align:left;">
+                                                            <div class="col-12 p-2"><b>Prodotti selezionati</b></div>
+                                                            <span class="m-1" v-for="(value,key) in abstract.childs_selected" :key="key"><span class="p-2 m-1" style="border-radius:5px; color:white; background:var(--warning);">{{value.sku}}</span><i class="p-2 fa fa-remove" style="cursor:pointer; position:relative; top:-15px; left:-15px; color:var(--danger);" v-on:click="removeChildSelected(key)"></i></span>
+                                                        </div>
+                                                        <div class="col-xl-10">
+                                                            <div class="input-group-prepend">
+                                                                <div class="input-group-prepend mr-2">
+                                                                    <span class="input-group-text" id="product_gtin">Figli disponibili</span>
+                                                                </div>
+                                                                <select class="custom-select" data-live-search="true" v-model="s_child">
+                                                                    <option v-for="(value,key) in abstract.childs_availables" :key="key" :value="value">{{value.sku}} - {{value.title}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-2 m-auto">
+                                                            <button class="btn btn-warning" :disabled="s_child==null" v-on:click="addChildSelected()">Aggiungi</button>
+                                                        </div>
+                                                    </div>
+                                                    <hr/>
+                                                    <div class="row col-xl-12 p-2">
+                                                        <div class="col-12 p-2" style="text-align:left;">
+                                                            <span class="m-1" v-for="(value,key) in abstract.variations_selected" :key="key"><span class="p-2 m-1" style="border-radius:5px; color:white; background:var(--warning);">{{value.description}}</span><i class="p-2 fa fa-remove" style="cursor:pointer; position:relative; top:-15px; left:-15px; color:var(--danger);" v-on:click="removeVariationSelected(key)"></i></span>
+                                                        </div>
                                                     <div class="col-xl-10">
                                                         <div class="input-group-prepend">
                                                             <div class="input-group-prepend mr-2">
-                                                                <span class="input-group-text" id="product_gtin">Figli disponibili</span>
+                                                                <span class="input-group-text" id="product_gtin">Varianti disponibili</span>
                                                             </div>
-                                                            <select class="custom-select" data-live-search="true" v-model="s_child">
-                                                                <option v-for="(value,key) in abstract.childs_availables" :key="key" :value="value">{{value.sku}} - {{value.title}}</option>
+                                                            
+                                                        <select class="custom-select" data-live-search="true" v-model="s_variation">
+                                                                <option v-for="(value,key) in abstract.variations_availables" :key="key" :value="value">{{value.description}}</option>
                                                             </select>
                                                         </div>
                                                     </div>
                                                     <div class="col-2 m-auto">
-                                                        <button class="btn btn-warning" :disabled="s_child==null" v-on:click="addChildSelected()">Aggiungi</button>
+                                                        <button class="btn btn-warning" :disabled="s_variation==null" v-on:click="addVariationSelected()" >Aggiungi</button>
                                                     </div>
-                                                </div>
-                                                <hr/>
-                                                <div class="row col-xl-12 p-2">
-                                                    <div class="col-12 p-2" style="text-align:left;">
-                                                        <span class="m-1" v-for="(value,key) in abstract.variations_selected" :key="key"><span class="p-2 m-1" style="border-radius:5px; color:white; background:var(--warning);">{{value.description}}</span><i class="p-2 fa fa-remove" style="cursor:pointer; position:relative; top:-15px; left:-15px; color:var(--danger);" v-on:click="removeVariationSelected(key)"></i></span>
                                                     </div>
-                                                <div class="col-xl-10">
-                                                    <div class="input-group-prepend">
-                                                        <div class="input-group-prepend mr-2">
-                                                            <span class="input-group-text" id="product_gtin">Varianti disponibili</span>
-                                                        </div>
-                                                        
-                                                    <select class="custom-select" data-live-search="true" v-model="s_variation">
-                                                            <option v-for="(value,key) in abstract.variations_availables" :key="key" :value="value">{{value.description}}</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-2 m-auto">
-                                                    <button class="btn btn-warning" :disabled="s_variation==null" v-on:click="addVariationSelected()" >Aggiungi</button>
-                                                </div>
-                                                </div>
-                                            </template>
-                                        </div>
+                                                </template>
+                                            </div>
+                                            
                                         
+                                        </template>
+                                    </div>
                                     
-                                    </template>
                                 </div>
-                                <div class="col-xl-12 col-12 mb-3">
+                            </div>
+                        </div>
+                        </div>
+                        <div class="tab-pane fade show" :class="{ 'active' : tab=='descriptions'}"  role="tabpanel" aria-labelledby="descriptions-tab">
+                            <div class="col-12 row">
+                                <div class="col-xl-6 col-12">
+                                    <div class="col-xl-12 col-12 mb-3">
                                         <div class="input-group">
                                             <div class="input-group-prepend mr-2" style="min-width:100%">
                                                 <span class="input-group-text" id="product_short_description" style="min-width:100%">Descrizione breve</span>
                                             </div>
                                         </div>
                                         <textarea class="form-control" type="text" v-model="product.short_description"></textarea>
-                                </div>
-                                <div class="col-xl-12 col-12">
+                                    </div>
+                                    <div class="col-xl-12 col-12">
                                         <div class="input-group">
                                             <div class="input-group-prepend mr-2" style="min-width:100%">
                                                 <span class="input-group-text" id="product_description" style="min-width:100%">Descrizione</span>
                                             </div>
                                         </div>
                                         <textarea class="form-control" type="text" v-model="product.description" style="min-height:300px"></textarea>
+                                    </div>
                                 </div>
-                                <div class="col-xl-12 col-12">
+                                <div class="col-xl-6">
+                                    <div class="col-xl-12 col-12">
                                         <div class="input-group">
                                             <div class="input-group-prepend mr-2" style="min-width:100%">
                                                 <span class="input-group-text" id="product_description" style="min-width:100%">Vista descrizione</span>
                                             </div>
                                         </div>
                                         <div class="form-control" style="all:revert !important; text-align:left !important;" v-html="product.description"></div>
+                                    </div>
                                 </div>
                             </div>
+                            <template v-if="product.type=='C'">
+                                <hr/>
+
+                                <div class="col-12 mt-4 row">
+                                    <div class="col-xl-6 col-12">
+                                        <div class="col-xl-12 col-12 mb-3">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend mr-2" style="min-width:100%">
+                                                    <span class="input-group-text" id="product_short_description" style="min-width:100%">Descrizione breve</span>
+                                                </div>
+                                            </div>
+                                            <textarea class="form-control" type="text" v-model="product.short_description"></textarea>
+                                        </div>
+                                        <div class="col-xl-12 col-12">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend mr-2" style="min-width:100%">
+                                                    <span class="input-group-text" id="product_description" style="min-width:100%">Descrizione</span>
+                                                </div>
+                                            </div>
+                                            <textarea class="form-control" type="text" v-model="product.description" style="min-height:300px"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6">
+                                        <div class="col-xl-12 col-12">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend mr-2" style="min-width:100%">
+                                                    <span class="input-group-text" id="product_description" style="min-width:100%">Vista descrizione</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-control" style="all:revert !important; text-align:left !important;" v-html="product.description"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>                       
                         </div>
+                        <div class="tab-pane fade show" :class="{ 'active' : tab=='seo'}"  role="tabpanel" aria-labelledby="seo-tab"></div>
                     </div>
-                            </div>
-                            <div class="tab-pane fade" :class="{ 'active' : tab=='seo'}"  role="tabpanel" aria-labelledby="seo-tab"></div>
-                        </div>
                     
                 </div>
             </div>

@@ -119,7 +119,7 @@ nav{
   height: 100vh;
 }
 .thumbnails{
-    height:30px;
+    height:50px;
 }
 
 </style>
