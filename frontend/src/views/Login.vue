@@ -109,7 +109,7 @@ export default {
             
          })
          .catch(error => {
-            this.error=error.response.data.details;
+            this.error=error.response.data.detail;
             this.username="";
             this.password="";
          });

@@ -1,122 +1,436 @@
 <template>
     <div>
-        <Sidebar parent="products" child="simple"/>
-        <div class="main-panel">
-            <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
-            <div class="top" v-if="marketplace">
-                <div class="row">
-                    <div class="col-md-8" v-if="marketplace" style="text-align:left">
-                        <div class="p-2">
-                            <img class="p-1 me-2 thumbnails" :src="marketplaceImg" />
-                            <b>{{marketplace._code}} {{marketplace._country}}</b>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="btn-group bootstrap-select dropup">
-                            <button type="button" class="btn dropdown-toggle bs-placeholder btn-default btn-outline" data-toggle="dropdown" role="button" title="Marketplace" aria-expanded="false">
-                                <span class="filter-option pull-left">I tuoi marketplace</span>
-                                <span class="bs-caret">
-                                    <span class="caret"></span>
-                                </span>
-                            </button>
-                            <div class="dropdown-menu open">
-                                <ul class="dropdown-menu inner" role="listbox" aria-expanded="false" style="max-height: 395px; overflow-y: auto; min-height: 0px;">
-                                    <li data-original-index="key" >
-                                        <a type="button" v-on:click="changeMarketplace(key)" v-for="(market,key) in marketplaces" :key="key" tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false">
-                                            <span class="text">{{market._code}} - {{market._country}}</span>
-                                            <span class="nc-icon nc-check-2 check-mark"></span>
-                                        </a>
-                                    </li>  
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-1"></div>
-                </div>
-            </div>
-            <div class="center" v-if="marketplace"> 
-                <div class="container-fluid">
-                    
-                    <h4 class="float-left">Nuovo prodotto</h4>
-                    <div class="col-12 row">
-                        <div class="col-xl-3 col-sm-12">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="product_type">Tipologia</span>
-                                </div>
-                                <select class="custom-select" aria-label="Tipo prodotto" aria-describedby="product_type" v-model="product.type" v-on:change="selectProductType($event.target.value)">
-                                    <option selected></option>
-                                    <option value="S">Semplice</option>
-                                    <option value="C">Configurabile</option>
-                                    <option value="M">Multiplo</option>
-                                    <option value="B">Misto</option>
-                                </select>
-                            </div>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="product_sku">SKU</span>
-                                </div>
-                                <input class="form-control" type="text" v-model="product.sku">
-                            </div>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="product_title">Titolo</span>
-                                </div>
-                                <input class="form-control" type="text" v-model="product.title">
-                            </div>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="product_category">Categoria</span>
-                                </div>
-                                <select class="custom-select" aria-label="Categoria" aria-describedby="product_category" v-model="product.category">
-                                    <option value=""></option>
-                                    
-                                </select>
-                            </div>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <select class="custom-select" style="background-color:#e9ecef" v-model="product.gtin_type">
-                                        <option value="NOGTIN">Esente</option>
-                                        <option value="EAN">Configurabile</option>
-                                        <option value="ISBN">Multiplo</option>
-                                    </select>
-                                </div>
-                                <input class="form-control" type="text" v-model="product.gtin">
-                            </div>
-                           
-                        </div>
-                        
-                    </div>
-
-
-
-
-
-
-
+        <Sidebar :company.sync="company" parent="dashboard" />
         
-      
-
-
-
-
-
-
-
-
-                   
-                </div>
-            </div>
-          
-        </div>
+        <div class="main-panel">
+            <!-- Navbar -->
+            <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
+            <!-- End Navbar -->
+            <div class="center" v-if="this.company">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-3 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-body ">
+                                    <div class="row">
+                                        <div class="col-5">
+                                            <div class="icon-big text-center icon-warning">
+                                                <i class="nc-icon nc-chart text-warning"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-7">
+                                            <div class="numbers">
+                                                <p class="card-category">Number</p>
+                                                <h4 class="card-title">150GB</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer ">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-refresh"></i> Update Now
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-body ">
+                                    <div class="row">
+                                        <div class="col-5">
+                                            <div class="icon-big text-center icon-warning">
+                                                <i class="nc-icon nc-light-3 text-success"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-7">
+                                            <div class="numbers">
+                                                <p class="card-category">Revenue</p>
+                                                <h4 class="card-title">$ 1,345</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer ">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-calendar-o"></i> Last day
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-body ">
+                                    <div class="row">
+                                        <div class="col-5">
+                                            <div class="icon-big text-center icon-warning">
+                                                <i class="nc-icon nc-vector text-danger"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-7">
+                                            <div class="numbers">
+                                                <p class="card-category">Errors</p>
+                                                <h4 class="card-title">23</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer ">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-clock-o"></i> In the last hour
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-body ">
+                                    <div class="row">
+                                        <div class="col-5">
+                                            <div class="icon-big text-center icon-warning">
+                                                <i class="nc-icon nc-favourite-28 text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-7">
+                                            <div class="numbers">
+                                                <p class="card-category">Followers</p>
+                                                <h4 class="card-title">+45K</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer ">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-refresh"></i> Update now
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card ">
+                                <div class="card-header ">
+                                    <h4 class="card-title">Global Sales by Top Locations</h4>
+                                    <p class="card-category">All products that were shipped</p>
+                                </div>
+                                <div class="card-body ">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <div class="flag">
+                                                                    <img src="../assets/img/flags/US.png"/> </div>
+                                                            </td>
+                                                            <td>USA</td>
+                                                            <td class="text-right">
+                                                                2.920
+                                                            </td>
+                                                            <td class="text-right">
+                                                                53.23%
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <div class="flag">
+                                                                    <img src="../assets/img/flags/DE.png"/> </div>
+                                                            </td>
+                                                            <td>Germany</td>
+                                                            <td class="text-right">
+                                                                1.300
+                                                            </td>
+                                                            <td class="text-right">
+                                                                20.43%
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <div class="flag">
+                                                                    <img src="../assets/img/flags/AU.png"/> </div>
+                                                            </td>
+                                                            <td>Australia</td>
+                                                            <td class="text-right">
+                                                                760
+                                                            </td>
+                                                            <td class="text-right">
+                                                                10.35%
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <div class="flag">
+                                                                    <img src="../assets/img/flags/GB.png"/> </div>
+                                                            </td>
+                                                            <td>United Kingdom</td>
+                                                            <td class="text-right">
+                                                                690
+                                                            </td>
+                                                            <td class="text-right">
+                                                                7.87%
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <div class="flag">
+                                                                    <img src="../assets/img/flags/RO.png"/> </div>
+                                                            </td>
+                                                            <td>Romania</td>
+                                                            <td class="text-right">
+                                                                600
+                                                            </td>
+                                                            <td class="text-right">
+                                                                5.94%
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <div class="flag">
+                                                                    <img src="../assets/img/flags/BR.png"/> </div>
+                                                            </td>
+                                                            <td>Brasil</td>
+                                                            <td class="text-right">
+                                                                550
+                                                            </td>
+                                                            <td class="text-right">
+                                                                4.34%
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                </div>
+                                                </div>
+                                                <div class="col-md-6 ml-auto mr-auto">
+                                                    <div id="worldMap" style="height: 300px;"></div>
+                                                </div>
+                                                </div>
+                                                </div>
+                                                </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="card ">
+                                                        <div class="card-header ">
+                                                            <h4 class="card-title">Email Statistics</h4>
+                                                            <p class="card-category">Last Campaign Performance</p>
+                                                        </div>
+                                                        <div class="card-body ">
+                                                            <div id=chartEmail class="ct-chart ct-perfect-fourth"></div>
+                                                        </div>
+                                                        <div class="card-footer ">
+                                                            <div class="legend">
+                                                                <i class="fa fa-circle text-info"></i> Open
+                                                                <i class="fa fa-circle text-danger"></i> Bounce
+                                                                <i class="fa fa-circle text-warning"></i> Unsubscribe
+                                                            </div>
+                                                            <hr>
+                                                            <div class="stats">
+                                                                <i class="fa fa-clock-o"></i> Campaign sent 2 days ago
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="card ">
+                                                        <div class="card-header ">
+                                                            <h4 class="card-title">Users Behavior</h4>
+                                                            <p class="card-category">24 Hours performance</p>
+                                                        </div>
+                                                        <div class="card-body ">
+                                                            <div id=chartHours class="ct-chart"></div>
+                                                        </div>
+                                                        <div class="card-footer ">
+                                                            <div class="legend">
+                                                                <i class="fa fa-circle text-info"></i> Open
+                                                                <i class="fa fa-circle text-danger"></i> Click
+                                                                <i class="fa fa-circle text-warning"></i> Click Second Time
+                                                            </div>
+                                                            <hr>
+                                                            <div class="stats">
+                                                                <i class="fa fa-history"></i> Updated 3 minutes ago
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="card ">
+                                                        <div class="card-header ">
+                                                            <h4 class="card-title">2017 Sales</h4>
+                                                            <p class="card-category">All products including Taxes</p>
+                                                        </div>
+                                                        <div class="card-body ">
+                                                            <div id="chartActivity" class="ct-chart"></div>
+                                                        </div>
+                                                        <div class="card-footer ">
+                                                            <div class="legend">
+                                                                <i class="fa fa-circle text-info"></i> Tesla Model S
+                                                                <i class="fa fa-circle text-danger"></i> BMW 5 Series
+                                                            </div>
+                                                            <hr>
+                                                            <div class="stats">
+                                                                <i class="fa fa-check"></i> Data information certified
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card  card-tasks">
+                                                        <div class="card-header ">
+                                                            <h4 class="card-title">Tasks</h4>
+                                                            <p class="card-category">Backend development</p>
+                                                        </div>
+                                                        <div class="card-body ">
+                                                            <div class="table-full-width">
+                                                                <table class="table">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div class="form-check">
+                                                                                    <label class="form-check-label">
+                                                                                        <input class="form-check-input" type="checkbox" value="">
+                                                                                        <span class="form-check-sign"></span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>Sign contract for "What are conference organizers afraid of?"</td>
+                                                                            <td class="td-actions text-right">
+                                                                                <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-link">
+                                                                                    <i class="fa fa-edit"></i>
+                                                                                </button>
+                                                                                <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-link">
+                                                                                    <i class="fa fa-times"></i>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div class="form-check">
+                                                                                    <label class="form-check-label">
+                                                                                        <input class="form-check-input" type="checkbox" value="" checked>
+                                                                                        <span class="form-check-sign"></span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>Lines From Great Russian Literature? Or E-mails From My Boss?</td>
+                                                                            <td class="td-actions text-right">
+                                                                                <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-link">
+                                                                                    <i class="fa fa-edit"></i>
+                                                                                </button>
+                                                                                <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-link">
+                                                                                    <i class="fa fa-times"></i>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div class="form-check">
+                                                                                    <label class="form-check-label">
+                                                                                        <input class="form-check-input" type="checkbox" value="" checked>
+                                                                                        <span class="form-check-sign"></span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit
+                                                                            </td>
+                                                                            <td class="td-actions text-right">
+                                                                                <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-link">
+                                                                                    <i class="fa fa-edit"></i>
+                                                                                </button>
+                                                                                <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-link">
+                                                                                    <i class="fa fa-times"></i>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div class="form-check">
+                                                                                    <label class="form-check-label">
+                                                                                        <input class="form-check-input" type="checkbox" checked>
+                                                                                        <span class="form-check-sign"></span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>Create 4 Invisible User Experiences you Never Knew About</td>
+                                                                            <td class="td-actions text-right">
+                                                                                <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-link">
+                                                                                    <i class="fa fa-edit"></i>
+                                                                                </button>
+                                                                                <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-link">
+                                                                                    <i class="fa fa-times"></i>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div class="form-check">
+                                                                                    <label class="form-check-label">
+                                                                                        <input class="form-check-input" type="checkbox" value="">
+                                                                                        <span class="form-check-sign"></span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>Read "Following makes Medium better"</td>
+                                                                            <td class="td-actions text-right">
+                                                                                <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-link">
+                                                                                    <i class="fa fa-edit"></i>
+                                                                                </button>
+                                                                                <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-link">
+                                                                                    <i class="fa fa-times"></i>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div class="form-check">
+                                                                                    <label class="form-check-label">
+                                                                                        <input class="form-check-input" type="checkbox" value="" checked>
+                                                                                        <span class="form-check-sign"></span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>Unfollow 5 enemies from twitter</td>
+                                                                            <td class="td-actions text-right">
+                                                                                <button type="button" rel="tooltip" title="Edit Task" class="btn btn-info btn-simple btn-link">
+                                                                                    <i class="fa fa-edit"></i>
+                                                                                </button>
+                                                                                <button type="button" rel="tooltip" title="Remove" class="btn btn-danger btn-simple btn-link">
+                                                                                    <i class="fa fa-times"></i>
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-footer ">
+                                                            <hr>
+                                                            <div class="stats">
+                                                                <i class="now-ui-icons loader_refresh spin"></i> Updated 3 minutes ago
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
     </div>
     
 </template>
 
 <script>
 import Sidebar from "../components/Sidebar.vue";
-import CheckboxButton from "../components/CheckboxButton.vue";
-import RadioButton from "../components/RadioButton.vue";
+// import CheckboxButton from "../components/CheckboxButton.vue";
+// import RadioButton from "../components/RadioButton.vue";
 import Nav from "../components/Nav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
@@ -183,16 +497,21 @@ export default{
             try{
                     const res = await this.axios.get("/api/companies/").then((res)=>{
                         this.companies=res.data.results;
-                        this.company=res.data.results[0];
+                        if(this.companies.length>0){
+                            this.company=res.data.results[0];
+                        }
+                        else{
+                            this.company=null;
+                            this.$router.push("/companies");
+                        }
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
                     })
                 }
                 catch(error) {
-                    if(error.response!=null){
-                        this.toast.error(error.response.data.detail);
-                    }
-                    else{
-                        this.toast.error("Errore indefinito");
-                    }
+                    this.toast.error("Errore indefinito (Azienda)");
                 };
 
         },
@@ -215,91 +534,7 @@ export default{
                 }  
             }
         },
-        // async getProducts() {
-        //     if(this.marketplace!==null){
-        //         var querystring="";
-        //         for(const [obj,key] of Object.entries(this.filters)){
-        //             var operator="";
-        //             var attribute=obj;
-        //             var value=this.filters[obj].value;
-        //             var active=this.filters[obj].active;
-        //             if(attribute!="images" && attribute!="attributes"){
-        //                 operator=(this.filters[obj].action);
-        //             }
-        //             if(active){
-        //                 querystring=querystring+"&"+attribute+"="+operator+value
-        //             }
-        //         }
-        //         try{
-        //             const res = await this.axios.get("/api/products/simple/?company="+this.company.id+"&marketplace="+this.marketplace.id+querystring).then((res) => {
-        //                 this.products=[]
-        //                 for(var i=0; i<res.data.count; i++){
-        //                     var obj=res.data.results[i];
-        //                     var product = {
-        //                         "id":obj["id"],
-        //                         "sku":obj.sku,
-        //                         "productType":"Semplice",
-        //                         "gtin":obj.gtin,
-        //                         "gtin_type":obj.gtin_type
-        //                     };
-        //                     for(var k=0; k<obj.text_eav.length;k++){
-        //                         product[obj.text_eav[k].attribute]=obj.text_eav[k].value;
-        //                     }
-        //                     for(var k=0; k<obj.int_eav.length;k++){
-        //                         product[obj.int_eav[k].attribute]=obj.int_eav[k].value;
-        //                     }
-        //                     for(var k=0; k<obj.char_eav.length;k++){
-        //                         product[obj.char_eav[k].attribute]=obj.char_eav[k].value;
-        //                     }
-        //                     for(var k=0; k<obj.decimal_eav.length;k++){
-        //                         product[obj.decimal_eav[k].attribute]=obj.decimal_eav[k].value;
-        //                     }
-        //                     for(var k=0; k<obj.boolean_eav.length;k++){
-        //                         product[obj.boolean_eav[k].attribute]=obj.boolean_eav[k].value;
-        //                     }
-        //                     for(var k=0; k<obj.url_eav.length;k++){
-        //                         product[obj.url_eav[k].attribute]=obj.url_eav[k].value;
-        //                     }
-        //                     this.products.push(product);
-        //                 };
-        //             })
-        //         }
-        //         catch(error){
-        //             if(error.response!=null){
-        //                 this.toast.error(error.response.data.detail);
-        //             }
-        //             else{
-        //                 this.toast.error("Errore indefinito");
-        //             }
-        //         }
-        //     }
-            
-        // },
-        // async getAttributes(){
-        //     try {
-        //         const res = await this.axios.get("/api/products/attributes/?company="+this.company.id)
-        //         this.attributes=res.data.results;
-        //     } catch (error) {
-        //         if(error.response!=null){
-        //             this.toast.error(error.response.data.detail);
-        //         }
-        //         else{
-        //             this.toast.error("Errore indefinito");
-        //         }
-        //     }
-        // },
-        // changeCompany(index){
-        //     var data=initialState();
-        //     data["companies"]=this.companies;
-        //     data["company"]=this.companies[index];
-        //     Object.assign(this.$data,data);
-        //     this.getMarketplaces().then(this.getProducts).then(this.getAttributes)
-        // },
-        // changeMarketplace(index){
-        //     this.marketplace=this.marketplaces[index]
-        //     this.marketplaceImg="/src/assets/"+this.marketplace.code+".png"
-        //     this.getProducts();
-        // },
+        
         
         
         
@@ -314,7 +549,8 @@ export default{
     },
     components:{
         Sidebar,
-        Nav,CheckboxButton,RadioButton
+        Nav,
+        // CheckboxButton,RadioButton
         
     }
 

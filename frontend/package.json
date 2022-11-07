@@ -9,8 +9,6 @@
   },
   "dependencies": {
     "axios": "^0.26.1",
-    "bootstrap-4": "^4.0.0",
-    "bootstrap-select": "^1.13.18",
     "boxicons": "^2.1.2",
     "npm": "^8.10.0",
     "sass": "^1.51.0",

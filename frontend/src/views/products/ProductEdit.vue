@@ -66,7 +66,7 @@
                             </ul>
                         </div>
                     </div>
-                        <div class="tab-content" id="tabContent" style="height:500px; overflow-y:scroll">
+                        <div class="tab-content" id="tabContent" >
                             <div class="tab-pane fade show" :class="{ 'active' : tab=='general'}" role="tabpanel" aria-labelledby="general-tab">
                                 <div class="col-12 row">
                                     <div class="input-group col-xl-5 col-12" style="display:block;">
@@ -188,8 +188,13 @@
                                                                 <div class="input-group-prepend mr-2">
                                                                     <span class="input-group-text" id="product_gtin">Figli disponibili</span>
                                                                 </div>
+                                                                <input class="form-control" style="font-weight:bold;"  placeholder="Filtra per SKU" type="text" v-model="skufiltervalue">
                                                                 <select class="custom-select" data-live-search="true" v-model="s_child">
-                                                                    <option v-for="(value,key) in abstract.childs_availables" :key="key" :value="value">{{value.sku}} - {{value.title}}</option>
+                                                                    <template v-for="(value,key) in abstract.childs_availables" :key="key">
+                                                                        <template v-if="value.sku.includes(this.skufiltervalue) || this.skufiltervalue==''">
+                                                                            <option :value="value">{{value.sku}} - {{value.title}}</option>
+                                                                    </template>
+                                                                    </template>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -509,7 +514,7 @@ function initialState (){
             
             s_child:null,
             s_variation:null,
-
+            skufiltervalue:'',
             productImages:{
                 image0:null,
                 image1:null,
@@ -660,7 +665,22 @@ export default{
         },
 
 
-
+        // filterChilds(value){
+            
+        //     if(value==""){
+        //         for(var i=0;i<this.abstract.childs_availables.length;i++){
+        //             this.filterSelected[i]=i;
+        //         }
+        //     }
+        //     else{
+        //         this.filterSelected=[];
+        //         for(var i=0;i<this.abstract.childs_availables.length;i++){
+        //             if(this.abstract.childs_availables[i].sku.includes(value)){
+        //                 this.filterSelected.push(i);
+        //             }
+        //         }
+        //     }
+        // },
 
 
         goToProduct(id){
@@ -746,15 +766,16 @@ export default{
         },
         postAbstractVariations() {
             if(this.marketplace!==null){
+                
                 const objdata={"childs":this.abstract.childs_selected,"variations":this.abstract.variations_selected}
                 this.axios.post("/api/abstract/variations/?company="+this.company.id+"&marketplace="+this.marketplace.id,objdata).then((res) => {
                     this.abstract=res.data.results;
+                    
                 }).catch((error)=>{
                     this.toast.error("Errore indefinito");    
                 });
                 
             }
-            
         },
         //FX Mi serve la lista dei prodotti in base al marketplace scelto
         getAbstractProducts(company,marketplace) {
@@ -771,9 +792,8 @@ export default{
                         this.fx.marketplaces=res.data.results;
                     })
             }
-                
-            
         },
+
         getFieldsValues(){
             var productType={"S":"simple", "C":"configurable", "M":"multiple", "B":"bulk"};
             var fields=[]
@@ -786,12 +806,8 @@ export default{
             this.axios.get("/api/products/"+productType[this.fx.product.type]+"/"+this.fx.product.id+"/?company="+this.fx.company+"&marketplace="+this.fx.marketplace).then((res)=>{
                     for(const [key,val] of Object.entries(res.data)){
                         if(!["id","sku","gtin","gtin_type"].includes(key)){
-                            
-                            
-                        
                             for(var i=0; i<val.length;i++){
                                 if(key=="url_eav" && val[i].attribute.substr(0,5)=="image" && fields.includes(val[i].attribute)){
-                                
                                     let url = val[i].value+"?"+performance.now();
                                     let attribute=val[i].attribute;
                                     this.axios.get(url, {responseType: 'blob'}).then((response) => {
@@ -955,7 +971,7 @@ export default{
 
             product["sku"]=this.product.sku
             product["type"]=this.product.type
-            if(this.product.type!="C"){
+            if(this.product.type=="S"){
                 if(!this.gtinIsOn){
                     product["gtin"]=this.product.gtin
                     product["gtin_type"]=this.product.gtin_type
@@ -963,6 +979,19 @@ export default{
                 else{
                     product["gtin"]=null
                     product["gtin_type"]="NOGTIN"
+                }
+            }
+            else if(this.product.type=="C"){
+                if(this.iHaveChilds){
+                    if(this.abstract.childs_selected.length<2 || this.abstract.variations_selected.length<1){
+                        this.toast.error("Devi selezionare almeno 2 prodotti figli e almeno 1 attributo variante");
+                        return;
+                    }
+                    product["childs"]=this.abstract.childs_selected;
+                    product["variations"]=this.abstract.variations_selected;
+                }
+                else{
+
                 }
             }
         

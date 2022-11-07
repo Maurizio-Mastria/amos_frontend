@@ -2,24 +2,27 @@ import { createApp } from 'vue'
 import {createRouter, createWebHistory} from 'vue-router'
 import App from './App.vue'
 import Dashboard from './views/Dashboard.vue'
-import Products from './views/products/Products.vue'
-import ProductEdit from './views/products/ProductEdit.vue'
 import ProductsSimple from './views/products/ProductsSimple.vue'
-import ProductsConfigurable from './views/products/ProductsConfigurable.vue'
-import ProductsMultiple from './views/products/ProductsMultiple.vue'
-import ProductsBulk from './views/products/ProductsBulk.vue'
-import Orders from './views/Orders.vue'
-import Messages from './views/Messages.vue'
-import Shippings from './views/Shippings.vue'
-import Imports from './views/Imports.vue'
-import ImportsNew from './views/ImportsNew.vue'
+import ProductSimple from './views/products/ProductSimple.vue'
+import Offers from './views/offers/Offers.vue'
+import Categories from './views/products/Categories.vue'
+import Company from './views/companies/Company.vue'
+import Companies from './views/companies/Companies.vue'
+import Profile from './views/Profile.vue'
+import Profiles from './views/Profiles.vue'
+import Permissions from './views/Permissions.vue'
+import Orders from './views/orders/Orders.vue'
+import Order from './views/orders/Order.vue'
+import Shippings from './views/shippings/Shippings.vue'
+import Shipping from './views/shippings/Shipping.vue'
+import Imports from './views/imports/Imports.vue'
+import ImportsNew from './views/imports/ImportsNew.vue'
 import Login from './views/Login.vue'
 import About from './views/About.vue'
 import VueAxios from 'vue-axios'
 import axios from 'axios'
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 import VueCookies from 'vue-cookies'
  
 
@@ -28,25 +31,37 @@ const options = {
 };
 
 
-
+if($(".selectpicker").length != 0){
+    $(".selectpicker").selectpicker();
+}
 const router = createRouter({
     history: createWebHistory(),
     routes:[
-        {path : '/', name: 'Dashboard', component:Dashboard},
-        {path : '/products', name: 'Prodotti', component:Products},
-        {path : '/products/edit', name: 'Prodotto', component:ProductEdit, props:true},
-        {path : '/products/simple', name: 'Prodotti Semplici', component:ProductsSimple},
-        {path : '/products/configurable', name: 'Prodotti Configurabili', component:ProductsConfigurable},
-        {path : '/products/multiple', name: 'Prodotti Multipli', component:ProductsMultiple},
-        {path : '/products/bulk', name: 'Prodotti Misti', component:ProductsBulk},
-        {path : '/orders', name: 'Ordini', component:Orders},
-        {path : '/messages', name: 'Messaggi', component:Messages},
-        {path : '/shippings', name: 'Spedizioni', component:Shippings},
+        {path : '/products/simple/', name: 'Lista Prodotti Semplici', component:ProductsSimple},
+        {path : '/product/simple/', name: 'Prodotto Semplice', component:ProductSimple, props:true},
+        {path : '/products/categories/', name: 'Categorie', component:Categories},
+        
+        {path : '/dashboard', name: 'Dashboard', component:Dashboard},
+        {path : '/offers/', name: 'Offerte', component:Offers},
+        {path : '/companies/', name: 'Aziende', component:Companies},
+        {path : '/company/', name: 'Azienda', component:Company},
+        {path : '/profiles/', name: 'Utenti', component:Profiles},
+        {path : '/profile/', name: 'Utente', component:Profile},
+        {path : '/permissions/', name: 'Permessi', component:Permissions},
+
+        {path : '/orders/', name: 'Ordini', component:Orders},
+        {path : '/order/', name: 'Ordine', component:Order},
+        
+        {path : '/shippings/', name: 'Spedizioni', component:Shippings},
+        {path : '/shipping/', name: 'Spedizione', component:Shipping},
         {path : '/about', name: 'About', component:About},
         {path : '/login', name: 'Login', component:Login},
         {path : '/imports', name: 'Imports', component:Imports},
         {path : '/imports/new/', name: 'ImportsNew', component:ImportsNew},
-        { path: '/:pathMatch(.*)*',redirect: '/'}
+
+
+
+        { path: '/:pathMatch(.*)*',redirect: '/dashboard/'}
     ]
 })
 
@@ -86,6 +101,4 @@ app.use(VueAxios,axios)
 app.use(Toast)
 app.use(VueCookies, {expire:'7d'})
 app.mount('#app')
-
-import "bootstrap/dist/js/bootstrap.js"
 

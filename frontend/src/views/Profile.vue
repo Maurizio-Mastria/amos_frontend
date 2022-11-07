@@ -1,0 +1,194 @@
+<template>
+    <div>
+        <Sidebar parent="" />
+        
+        <div class="main-panel">
+            <!-- Navbar -->
+            <Nav />
+            <!-- End Navbar -->
+            <div class="content">
+                <div class="container-fluid">
+                    <div class="row" v-if="this.profile && this.profile.user">
+                        <div class="col-md-6">
+                            <div class="card ">
+                                <div class="card-header">
+                                    <h4 class="card-title"><i class="text-info fa fa-user"></i> {{this.profile.user.username}}</h4>
+                                    <p class="card-category"><b>{{this.profile.user.first_name}} {{this.profile.user.last_name}}</b></p>
+                                    <div class="row">
+                                        <div class="col-md-6 card-category text-left">Iscritto dal {{this.profile.user.date_joined}}</div>
+                                        <div class="col-md-6 card-category text-right">Ultimo login {{this.profile.user.last_login}}</div>
+                                    </div>
+                                </div>
+                                <div class="card-body" >
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <tbody v-if="!this.modify.profile">
+                                                        <tr><th>Nome</th><td>{{this.profile.user.first_name}}</td></tr>
+                                                        <tr><th>Cognome</th><td>{{this.profile.user.last_name}}</td></tr>
+                                                        <tr><th>Email</th><td>{{this.profile.user.email}}</td></tr>
+                                                        <tr><th>Telefono</th><td>{{this.profile.phone}}</td></tr>
+                                                    </tbody>
+                                                    
+                                                    <tbody v-else>
+                                                        <tr><th>Nome</th><td><input type="text" v-model="this.profile.user.first_name"/></td></tr>
+                                                        <tr><th>Cognome</th><td><input type="text" v-model="this.profile.user.last_name"/></td></tr>
+                                                        <tr><th>Email</th><td>{{this.profile.user.email}}</td></tr>
+                                                        <tr><th>Telefono</th><td><input type="text" v-model="this.profile.phone"/></td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 text-left">
+                                            <button v-if="!modify.profile" class="btn btn-info" v-on:click="this.modify.profile=!this.modify.profile">Modifica</button>
+                                            <button v-if="modify.profile" class="btn btn-info" v-on:click="this.modify.profile=!this.modify.profile" >Annulla</button>
+                                        </div>
+                                        <div class="col-6 text-right">
+                                            <button v-if="modify.profile" class="btn btn-success" v-on:click="this.saveUser()">Invia modifiche</button>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card ">
+                                <div class="card-header">
+                                    <h4 class="card-title"><i class="text-info fa fa-tablet"></i> 2FA - Two Factor Authentication</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <p><i class="text-success fa fa-circle"></i> L'autenticazione a due fattori è attiva</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <Footer />
+        </div>
+    </div>
+</template>
+
+<script>
+import Sidebar from "../components/Sidebar.vue";
+import Footer from "../components/Footer.vue";
+// import CheckboxButton from "../components/CheckboxButton.vue";
+// import RadioButton from "../components/RadioButton.vue";
+import Nav from "../components/Nav.vue";
+import { useToast } from "vue-toastification";
+function initialState (){
+  return {
+            profile:{},
+            modify:{
+                profile:false,
+            },
+        }
+}
+export default{
+    data(){
+        return initialState();
+    },
+    setup(){
+        const toast = useToast();
+        return { toast }
+    },
+	mounted(){
+        this.init();
+    },
+    computed:{
+        
+        
+    },
+	methods:{
+        async init(){
+            if(this.$route.query.id!=null && this.$route.query.company!=null){
+                this.getUser();
+            }
+            else{
+                this.router.push("/dashboard");
+            }
+        },
+        
+        getUser(){
+                this.axios.get("/api/users/"+this.$route.query.id+"/?company="+this.$route.query.company).then((res)=>{
+                        this.profile=res.data;
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                            this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
+                        }
+                    });
+        },
+        saveUser(){
+            this.axios.put("/api/users/"+this.profile.id+"/",this.profile).then((res)=>{
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                            this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
+                        }
+                    });
+        }
+},
+    components:{
+        Sidebar,
+        Nav,Footer
+        // CheckboxButton,RadioButton
+        
+    }
+
+
+    
+
+}
+</script>
+<style scoped>
+
+#left-col{
+    position:fixed;
+    width:400px;
+    right:var(--right-width);
+    
+  padding: 10px ;
+    color: rgb(26, 26, 26);
+    min-height:100px;
+
+  background:
+    linear-gradient(white, white) padding-box,
+    linear-gradient(to right, #FFA534, #FFA534) border-box;
+    
+  border-right : 5px solid transparent;
+  border-left : 5px solid transparent;
+  border-top : 1px solid transparent;
+  border-bottom : 1px solid transparent;
+  
+
+        }
+
+td{
+    padding:5px 5px 5px 5px;
+}
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(500px);
+  opacity: 0;
+}
+.z-9{
+    z-index:999999;
+}
+</style>
