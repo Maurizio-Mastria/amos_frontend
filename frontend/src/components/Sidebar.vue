@@ -44,14 +44,14 @@
                         </div>
                     </div>
                 </div>
-                <ul class="nav" v-if="company || my_permission.is_superuser || my_permission.is_staff">
+                <ul class="nav" v-if="company || my_permission.is_staff">
                     <li class="nav-item ">
                         <a class="nav-link" href="/dashboard">
                             <i class="nc-icon nc-chart-pie-35"></i>
                             <p>Dashboard</p>
                         </a>
                     </li>
-                    <li v-if="my_permission.permissions.products>0 || my_permission.is_superuser || my_permission.is_staff" class="nav-item">
+                    <li v-if="my_permission.is_staff || (my_permission.permission && my_permission.products>0)" class="nav-item">
                         <a class="nav-link" data-toggle="collapse" href="#products">
                             <i class="nc-icon nc-app"></i>
                             <p>
@@ -90,7 +90,7 @@
                             </ul>
                         </div>
                     </li>
-                    <li v-if="my_permission.permissions.offers>0 || my_permission.is_superuser || my_permission.is_staff" class="nav-item">
+                    <li v-if="my_permission.is_staff " class="nav-item">
                         <a class="nav-link" href="/inventory">
                             <i class="nc-icon nc-chart-pie-35"></i>
                             <p>Inventario</p>
@@ -121,7 +121,7 @@
                             </ul>
                         </div>
                     </li>
-                    <li v-if="my_permission.permissions.orders>0 || my_permission.is_superuser || my_permission.is_staff" class="nav-item">
+                    <li v-if="my_permission.is_staff" class="nav-item">
                         <a class="nav-link" data-toggle="collapse" href="#orders">
                             <i class="nc-icon nc-bullet-list-67"></i>
                             <p>
@@ -157,7 +157,9 @@
 import { useToast } from "vue-toastification";
 function initialState (){
 return {
-        my_permission:{},
+        my_permission:{
+        },
+        ready:false,
     }
 }
 
@@ -176,27 +178,27 @@ export default{
         return { toast }
     },
 	mounted(){
-        this.getMyPermissions();
+        this.getMe();
     },
     methods:{
-        getMyPermissions(){
-            var url="/api/me/authorizations/";
-            if(this.company){
-                url+="?company="+this.company.id;
-            }
-            this.axios.get(url).then((res)=>{
-                this.my_permission=res.data;
-                    
-                        
-                        
-                
-                
-            }).catch((error)=>{
-                if(error.response!=null){
-                    this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
-                }
+        getMe(){
+            this.axios.get("/api/me/").then((res)=>{
+                if(res.data.results[0].is_staff==true || res.data.results[0].is_superuser==true )
+                    this.my_permission.is_staff=true;
             })
         },
+
+        getMyPermissions(){
+            this.axios.get("api/me/authorizations/?company="+this.company.id).then((res)=>{
+                this.my_permission=res.data;
+            })
+        },
+                
+                
+            
+                    
+                        
+          
     }
     
 }

@@ -68,11 +68,11 @@
 </template>
 
 <script>
-import Sidebar from "../components/Sidebar.vue";
-import Footer from "../components/Footer.vue";
+import Sidebar from "../../components/Sidebar.vue";
+import Footer from "../../components/Footer.vue";
 // import CheckboxButton from "../components/CheckboxButton.vue";
 // import RadioButton from "../components/RadioButton.vue";
-import Nav from "../components/Nav.vue";
+import Nav from "../../components/Nav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {

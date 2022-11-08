@@ -7,10 +7,11 @@ import ProductSimple from './views/products/ProductSimple.vue'
 import Offers from './views/offers/Offers.vue'
 import Categories from './views/products/Categories.vue'
 import Company from './views/companies/Company.vue'
+import NewCompany from './views/companies/NewCompany.vue'
 import Companies from './views/companies/Companies.vue'
-import Profile from './views/Profile.vue'
-import Profiles from './views/Profiles.vue'
-import Permissions from './views/Permissions.vue'
+import User from './views/users/User.vue'
+import Users from './views/users/Users.vue'
+import Permissions from './views/companies/Permissions.vue'
 import Orders from './views/orders/Orders.vue'
 import Order from './views/orders/Order.vue'
 import Shippings from './views/shippings/Shippings.vue'
@@ -45,8 +46,8 @@ const router = createRouter({
         {path : '/offers/', name: 'Offerte', component:Offers},
         {path : '/companies/', name: 'Aziende', component:Companies},
         {path : '/company/', name: 'Azienda', component:Company},
-        {path : '/profiles/', name: 'Utenti', component:Profiles},
-        {path : '/profile/', name: 'Utente', component:Profile},
+        {path : '/companies/new/', name: 'Nuova Azienda', component:NewCompany},
+        
         {path : '/permissions/', name: 'Permessi', component:Permissions},
 
         {path : '/orders/', name: 'Ordini', component:Orders},
@@ -59,7 +60,7 @@ const router = createRouter({
         {path : '/imports', name: 'Imports', component:Imports},
         {path : '/imports/new/', name: 'ImportsNew', component:ImportsNew},
 
-
+        {path : '/user', name: 'User', component:User},
 
         { path: '/:pathMatch(.*)*',redirect: '/dashboard/'}
     ]

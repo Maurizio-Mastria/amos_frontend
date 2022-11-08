@@ -6,6 +6,7 @@
             <!-- Navbar -->
             <Nav />
             <!-- End Navbar -->
+            <div class="top"><div class="row col-12"><div class="col-12"><a :href="'/company?id='+this.company.id" class="btn btn-warning">Indietro</a></div></div></div>
             <div class="center">
                 <div class="container-fluid">
                     <div class="row">
@@ -88,11 +89,10 @@
 </template>
 
 <script>
-import Sidebar from "../components/Sidebar.vue";
-import Footer from "../components/Footer.vue";
+import Sidebar from "../../components/Sidebar.vue";
 // import CheckboxButton from "../components/CheckboxButton.vue";
 // import RadioButton from "../components/RadioButton.vue";
-import Nav from "../components/Nav.vue";
+import Nav from "../../components/Nav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
@@ -225,7 +225,7 @@ export default{
     },
     components:{
         Sidebar,
-        Nav,Footer
+        Nav
         // CheckboxButton,RadioButton
         
     }

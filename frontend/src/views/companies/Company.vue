@@ -6,24 +6,36 @@
             <!-- Navbar -->
             <Nav />
             <!-- End Navbar -->
+            <div class="top"><div class="row col-12"><div class="col-12"><a class="btn btn-warning" @click="this.$router.push('/companies')">Tutte le Aziende</a></div></div></div>
             <div class="center">
-                <div class="container-fluid">
+                <div class="container-fluid" v-if="this.company">
                     
 
                     <div class="row">
                         <div class="col-md-5">
                             <div class="card ">
                                 <div class="card-header">
-                                    <h4 class="card-title">{{this.company.name}}</h4>
-                                    <p class="card-category"><b>{{this.company.vid}}</b></p>
+                                    <div class="row">
+                                        <div class="col-7">
+                                            <h4 class="card-title">{{this.company.name}}</h4>
+                                            <p class="card-category"><b>{{this.company.vid}}</b></p>
+                                        </div>
+                                        <div class="col-5 text-right">
+                                            <template v-if="user.is_staff">
+                                                <button class="btn btn-danger" v-on:click="this.setCompanyStatus()" v-if="company.active==true">Disattiva</button>
+                                                <button class="btn btn-success" v-on:click="this.setCompanyStatus()" v-if="company.active==false">Attiva</button>
+                                            </template>
+                                        </div>        
+                                    </div>
                                 </div>
+                                
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="table-responsive">
                                                 <table class="table">
                                                     <tbody v-if="!this.modify.company" >
-                                                        <tr><th>Rag. Sociale</th><td>{{company.name}}</td></tr>
+                                                        <tr><th>Rag. Sociale</th><th>{{company.name}}</th></tr>
                                                         <tr><th>Vendor ID</th><td>{{company.vid}}</td></tr>
                                                         <tr><th>Indirizzo</th><td>{{company.address}}</td></tr>
                                                         <tr><th>Città</th><td>{{company.city}}</td></tr>
@@ -32,9 +44,10 @@
                                                         <tr><th>Nazione</th><td>{{company.country}}<img class="ml-2" :src="'/src/assets/img/flags/'+company.country+'.png'"/></td></tr>
                                                         <tr><th>PEC</th><td>{{company.pec}}</td></tr>
                                                         <tr><th>SDI</th><td>{{company.sdi}}</td></tr>
+                                                        <tr><th>Stato</th><th><template v-if="company.active"><i class="fa fa-circle text-success mr-4"></i>ATTIVA</template><template v-else><i class="fa fa-circle text-danger mr-4"></i>NON ATTIVA</template></th></tr>
                                                     </tbody>
                                                     <tbody v-else>
-                                                        <tr><th>Rag. Sociale</th><td><input type="text" v-model="company.name"/></td></tr>
+                                                        <tr><th>Rag. Sociale</th><td><input type="text" style="text-transform:uppercase" v-model="company.name"/></td></tr>
                                                         <tr><th>Vendor ID</th><td>{{company.vid}}</td></tr>
                                                         <tr><th>Indirizzo</th><td><input type="text" v-model="company.address"/></td></tr>
                                                         <tr><th>Città</th><td><input type="text" v-model="company.city"/></td></tr>
@@ -59,9 +72,76 @@
                                     </div>
                                     
                                 </div>
+                                <button v-if="user.is_superuser && company.active==false" class="btn btn-danger" v-on:click="this.deleteCompany()"> !!! Elimina definitivamente !!! </button>
                             </div>
                         </div>
                         <div class="col-md-7">
+                            <div class="card ">
+                                <div class="card-header">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <h4 class="card-title">Venditore</h4>
+                                        </div>
+                                        <div class="col-6  text-right">
+                                            <button v-if="user.is_staff && company.vendor==null && modify.vendor==false"  class="btn btn-danger" v-on:click="modify.vendor=true">Assegna proprietà</button>
+                                            <button v-if="user.is_staff && company.vendor==null && modify.vendor==true"  class="btn btn-success" v-on:click="modify.vendor=false; this.assign_vendor=null;">Annulla</button>
+                                            <button v-if="user.is_staff && company.vendor!=null && company.active==false"  v-on:click="modify.vendor=true" class="btn btn-danger">Modifica venditore</button>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <template v-if="modify.vendor">
+                                        <div class="row col-12 pt-4 pb-4">
+                                            <div class="col-3 p-2"><h5>Seleziona il venditore</h5></div>
+                                            <div class="col-7">
+                                                <select class="custom-select" v-model="assign_vendor">
+                                                    <option selected :value=null></option>
+                                                    <option v-for="(value,key) in this.all_users" :key="key" :value="value.id">{{value.username}} | {{value.first_name}} {{value.last_name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-2">
+                                                <button class="btn btn-danger" v-on:click="this.assignVendor()">Assegna</button>
+                                            </div>
+                                        </div>
+
+                                    </template>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div  v-if="this.company.vendor" class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr><th>User</th><th>Nome</th><th>Cognome</th><th>Email</th><th>Tel</th><th>Ultimo login</th><th class="text-center">Stato</th><th></th></tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        
+                                                        <tr>
+                                                            <th>{{this.company.vendor.username}}</th>
+                                                            <td>{{this.company.vendor.first_name}}</td>
+                                                            <td>{{this.company.vendor.last_name}}</td>
+                                                            <td>{{this.company.vendor.email}}</td>
+                                                            <td>{{this.company.vendor.phone}}</td>
+                                                            <td>{{this.company.vendor.last_login}}</td> 
+                                                            <td class="text-center">
+                                                                <template v-if="this.company.vendor.is_active"><i title="Attivo" class="fa fa-circle text-success"></i></template>
+                                                                <template v-else><i title="Disabilitato" class="fa fa-circle text-danger"></i></template>
+                                                            </td>
+                                                            <td class="text-right">
+                                                                <a :href="'/user?id='+this.company.vendor.id+'&company='+this.company.id" rel="tooltip" class="btn btn-warning" title="Vedi profilo">
+                                                                    <i class="fa fa-user"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
                             <div class="card ">
                                 <div class="card-header ">
                                     <div class="row">
@@ -69,11 +149,33 @@
                                             <h4 class="card-title">Collaboratori</h4>
                                         </div>
                                         <div class="col-6 text-right">
+                                            <template  v-if="this.user.is_staff">
+                                                <button class="btn btn-warning mr-2" v-on:click="modify.collaborator=!modify.collaborator">
+                                                    <template v-if="!modify.collaborator">Aggiungi un collaboratore</template>
+                                                    <template v-else>Annulla</template>
+                                                </button>
+                                            </template>
+                                            
                                             <a :href="'/permissions/?company='+this.company.id" class="btn btn-info">Modifica permessi</a>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="card-body ">
+                                    <template v-if="modify.collaborator">
+                                        <div class="row col-12 pt-4 pb-4">
+                                            <div class="col-3 p-2"><h5>Seleziona un collaboratore</h5></div>
+                                            <div class="col-7">
+                                                <select class="custom-select" v-model="assign_collaborator">
+                                                    <option selected :value=null></option>
+                                                    <option v-for="(value,key) in this.all_users" :key="key" :value="value.id">{{value.username}} | {{value.first_name}} {{value.last_name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-2">
+                                                <button class="btn btn-danger" v-on:click="this.assignCollaborator()">Assegna</button>
+                                            </div>
+                                        </div>
+
+                                    </template>
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="table-responsive">
@@ -94,12 +196,11 @@
                                                                 <template v-if="value.is_active"><i title="Attivo" class="fa fa-circle text-success"></i></template>
                                                                 <template v-else><i title="Disabilitato" class="fa fa-circle text-danger"></i></template>
                                                             </td>
-                                                            
-                                                            <!-- <td class="text-right">
-                                                                <a :href="'/profile?id='+profile.id+'&company='+this.company.id" rel="tooltip" class="btn btn-info" title="Vedi profilo">
+                                                            <td class="text-right">
+                                                                <a :href="'/user?id='+key+'&company='+this.company.id" rel="tooltip" class="btn btn-warning" title="Vedi profilo">
                                                                     <i class="fa fa-user"></i>
                                                                 </a>
-                                                            </td> -->
+                                                            </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -134,11 +235,15 @@ import { useToast } from "vue-toastification";
 function initialState (){
   return {
             authorizations:{},
-            company:{},
+            company:null,
             vendors:[],
             modify:{
                 company:false,
-            }
+                vendor:false,
+            },
+            user:{},
+            all_users:null,
+            assign_vendor:null,
         }
 }
 export default{
@@ -159,13 +264,14 @@ export default{
 	methods:{
         async init(){
             if(this.$route.query.id!=null){
-                this.getCompany().then(this.getUsers)
+                this.getMe().then(this.getCompany).then(this.getVendor).then(this.getUsers)
             }
         },
         async getCompany(){
             try{
                     const res = await this.axios.get("/api/companies/"+this.$route.query.id+"/").then((res)=>{
                         this.company=res.data;
+
                         
                         
                     }).catch((error)=>{
@@ -210,20 +316,123 @@ export default{
         },
         saveCompany(){
             this.axios.put("/api/companies/"+this.company.id+"/",this.company).then((res)=>{
-                        this.$router.go();
+                        this.toast.success("Modifiche salvate");
+                        this.modify.company=false;
                     }).catch((error)=>{
                         if(error.response!=null){
                             this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
                         }
                     })
+        },
+        
+        setCompanyStatus(){
+            var data={};
+            data["active"]=!this.company.active;
+            this.axios.put("/api/companies/"+this.company.id+"/",data).then((res)=>{
+                        if(res.data.active){
+                            this.toast.success("Azienda attivata");
+                            this.init();
+                        }
+                        else{
+                            this.toast.error("Azienda disattivata");
+                            this.init();
+                        }
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                            this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
+                        }
+                    })
+        },
+        
+        async getVendor(){
+            if(this.company.vendor!=null){
+                    try{    
+                
+                        const res = await this.axios.get("/api/users/"+this.company.vendor+"/").then((res)=>{
+                            this.company.vendor=res.data;
+                            
+                        
+                        }).catch((error)=>{
+                        if(error.response!=null){
+                            this.toast.error(error.response.data.detail);
+                        }
+                    })
+                }
+                catch(error) {
+                    this.toast.error("Errore indefinito (Azienda)");
+                };
+            }
+        },
+        
+        async getMe(){
+            try{
+                    const res = await this.axios.get("/api/me/").then((res)=>{
+                        this.user=res.data.results[0];
+                        if(this.user.is_staff){
+                            this.getAllUsers();
+                        }
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
+                    })
+                }
+                catch(error) {
+                    this.toast.error("Errore indefinito (Azienda)");
+                };
+
+        },
+        getAllUsers(){
+            this.axios.get("/api/users/").then((res)=>{
+                        this.all_users=res.data.results;
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
+                    })
+        },
+        assignVendor(){
+            var data={};
+            data["vendor"]=this.assign_vendor;
+            this.axios.put("/api/companies/"+this.company.id+"/",data).then((res)=>{
+                        this.toast.success("Venditore assegnato");
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                            this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
+                        }
+                    })
+        },
+        assignCollaborator(){
+            const applications=["products","orders","offers","messages","shippings","marketplaces","companies","couriers","authorizations","imports"]
+            var data={};
+            for(var i=0; i<applications.length;i++){
+                data["user"]=this.assign_collaborator;
+                data["company"]=this.company.id
+                data["permission"]=0
+                data["application"]=applications[i]
+                this.axios.post("/api/auth/?company="+this.company.id+"/",data)
+                        
+                    
+                
+            }
+            this.toast.success("Collaboratore assegnato");
+        },
+        
+        deleteCompany(){
+            this.axios.delete("/api/companies/"+this.company.id+"/").then((res)=>{
+                        this.toast.success("Azienda eliminata definitivamente");
+                        this.$router.go("/companies");
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                            this.toast.error(String(error.response.status)+" "+String(error.response.statusText));
+                        }
+                    })
         }
-        
-        
-        
-        
-        
-        
-        
         
         
         

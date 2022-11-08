@@ -6,17 +6,18 @@
             <!-- Navbar -->
             <Nav />
             <!-- End Navbar -->
-            <div class="content">
-                <div class="container-fluid">
-                    <div class="row" v-if="this.profile && this.profile.user">
+            <div class="top"><div class="row col-12"><div class="col-12"><a class="btn btn-warning" @click="this.$router.go(-1)">Indietro</a></div></div></div>
+            <div class="center">
+                <div class="container-fluid" v-if="this.user && this.user.profile">
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="card ">
                                 <div class="card-header">
-                                    <h4 class="card-title"><i class="text-info fa fa-user"></i> {{this.profile.user.username}}</h4>
-                                    <p class="card-category"><b>{{this.profile.user.first_name}} {{this.profile.user.last_name}}</b></p>
+                                    <h4 class="card-title"><i class="text-info fa fa-user"></i> {{this.user.username}}</h4>
+                                    <p class="card-category"><b>{{this.user.first_name}} {{this.user.last_name}}</b></p>
                                     <div class="row">
-                                        <div class="col-md-6 card-category text-left">Iscritto dal {{this.profile.user.date_joined}}</div>
-                                        <div class="col-md-6 card-category text-right">Ultimo login {{this.profile.user.last_login}}</div>
+                                        <div class="col-md-6 card-category text-left">Iscritto dal {{this.user.date_joined}}</div>
+                                        <div class="col-md-6 card-category text-right">Ultimo login {{this.user.last_login}}</div>
                                     </div>
                                 </div>
                                 <div class="card-body" >
@@ -24,18 +25,18 @@
                                         <div class="col-md-12">
                                             <div class="table-responsive">
                                                 <table class="table">
-                                                    <tbody v-if="!this.modify.profile">
-                                                        <tr><th>Nome</th><td>{{this.profile.user.first_name}}</td></tr>
-                                                        <tr><th>Cognome</th><td>{{this.profile.user.last_name}}</td></tr>
-                                                        <tr><th>Email</th><td>{{this.profile.user.email}}</td></tr>
-                                                        <tr><th>Telefono</th><td>{{this.profile.phone}}</td></tr>
+                                                    <tbody v-if="!this.modify.user">
+                                                        <tr><th>Nome</th><td>{{this.user.first_name}}</td></tr>
+                                                        <tr><th>Cognome</th><td>{{this.user.last_name}}</td></tr>
+                                                        <tr><th>Email</th><td>{{this.user.email}}</td></tr>
+                                                        <tr><th>Telefono</th><td>{{this.user.profile.phone}}</td></tr>
                                                     </tbody>
                                                     
                                                     <tbody v-else>
-                                                        <tr><th>Nome</th><td><input type="text" v-model="this.profile.user.first_name"/></td></tr>
-                                                        <tr><th>Cognome</th><td><input type="text" v-model="this.profile.user.last_name"/></td></tr>
-                                                        <tr><th>Email</th><td>{{this.profile.user.email}}</td></tr>
-                                                        <tr><th>Telefono</th><td><input type="text" v-model="this.profile.phone"/></td></tr>
+                                                        <tr><th>Nome</th><td><input type="text" v-model="this.user.first_name"/></td></tr>
+                                                        <tr><th>Cognome</th><td><input type="text" v-model="this.user.last_name"/></td></tr>
+                                                        <tr><th>Email</th><td>{{this.user.email}}</td></tr>
+                                                        <tr><th>Telefono</th><td><input type="text" v-model="this.user.profile.phone"/></td></tr>
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -43,11 +44,11 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-6 text-left">
-                                            <button v-if="!modify.profile" class="btn btn-info" v-on:click="this.modify.profile=!this.modify.profile">Modifica</button>
-                                            <button v-if="modify.profile" class="btn btn-info" v-on:click="this.modify.profile=!this.modify.profile" >Annulla</button>
+                                            <button v-if="!modify.user" class="btn btn-info" v-on:click="this.modify.user=!this.modify.user">Modifica</button>
+                                            <button v-if="modify.user" class="btn btn-info" v-on:click="this.modify.user=!this.modify.user" >Annulla</button>
                                         </div>
                                         <div class="col-6 text-right">
-                                            <button v-if="modify.profile" class="btn btn-success" v-on:click="this.saveUser()">Invia modifiche</button>
+                                            <button v-if="modify.user" class="btn btn-success" v-on:click="this.saveUser()">Invia modifiche</button>
                                         </div>
                                     </div>
                                     
@@ -73,23 +74,22 @@
                     </div>
                 </div>
             </div>
-            <Footer />
         </div>
     </div>
 </template>
 
 <script>
-import Sidebar from "../components/Sidebar.vue";
-import Footer from "../components/Footer.vue";
+import Sidebar from "../../components/Sidebar.vue";
+import Footer from "../../components/Footer.vue";
 // import CheckboxButton from "../components/CheckboxButton.vue";
 // import RadioButton from "../components/RadioButton.vue";
-import Nav from "../components/Nav.vue";
+import Nav from "../../components/Nav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
-            profile:{},
+            user:{},
             modify:{
-                profile:false,
+                user:false,
             },
         }
 }
@@ -110,7 +110,7 @@ export default{
     },
 	methods:{
         async init(){
-            if(this.$route.query.id!=null && this.$route.query.company!=null){
+            if(this.$route.query.id!=null){
                 this.getUser();
             }
             else{
@@ -120,7 +120,7 @@ export default{
         
         getUser(){
                 this.axios.get("/api/users/"+this.$route.query.id+"/?company="+this.$route.query.company).then((res)=>{
-                        this.profile=res.data;
+                        this.user=res.data;
                     }).catch((error)=>{
                         if(error.response!=null){
                             this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
@@ -128,8 +128,9 @@ export default{
                     });
         },
         saveUser(){
-            this.axios.put("/api/users/"+this.profile.id+"/",this.profile).then((res)=>{
-                        
+            this.axios.put("/api/users/"+this.user.id+"/",this.user).then((res)=>{
+                        this.toast.success("Modifiche salvate");
+                        this.modify.user=false;
                     }).catch((error)=>{
                         if(error.response!=null){
                             this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
@@ -139,7 +140,7 @@ export default{
 },
     components:{
         Sidebar,
-        Nav,Footer
+        Nav
         // CheckboxButton,RadioButton
         
     }

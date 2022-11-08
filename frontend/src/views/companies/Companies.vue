@@ -4,13 +4,13 @@
         
         <div class="main-panel">
             <!-- Navbar -->
-            <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
+            <Nav />
             <!-- End Navbar -->
             <div class="center">
                 <div class="container-fluid">
                          
                     <div class="row">
-                        <div class="col-xl-8">
+                        <div class="col-xl-12">
                             <div class="card ">
                                 <div class="card-header">
                                     <div class="row">
@@ -19,7 +19,7 @@
                                             <p class="card-category">Stato delle tue aziende</p>
                                         </div>
                                         <div class="col-6 text-right">
-                                            <button v-if="this.user.is_superuser" class="btn btn-info">Aggiungi azienda</button>
+                                            <a href="/companies/new/" v-if="this.user.is_staff" class="btn btn-info">Aggiungi azienda</a>
                                         </div>
                                     </div>
                                 </div>
@@ -29,13 +29,14 @@
                                             <div class="table-responsive">
                                                 <table class="table">
                                                     <tbody>
-                                                        <tr><th></th><th>Vendor ID</th><th>Rag. Sociale</th><th>P.IVA</th><th>PEC</th><th>SDI</th><th class="text-center">Stato</th><th></th></tr>
+                                                        <tr><th></th><th>Vendor ID</th><th>Vendor</th><th>Rag. Sociale</th><th>P.IVA</th><th>PEC</th><th>SDI</th><th class="text-center">Stato</th><th></th></tr>
                                                         <tr v-for="(company,key) in this.companies" :key="key">
                                                             <td>
                                                                 <div class="flag">
                                                                     <img :src="'/src/assets/img/flags/'+company.country+'.png'"/> </div>
                                                             </td>
                                                             <td><a title="Vedi" :href="'/company?id='+company.id"><b>{{company.vid}}</b></a></td>
+                                                            <td><template v-if="company.vendor">{{company.vendor.username}}</template></td>
                                                             <td>{{company.name}}</td>
                                                             <td>{{company.vat}}</td>
                                                             <td>{{company.pec}}</td>
@@ -61,7 +62,7 @@
                                             
                                         </div>
                                     </div>
-                                    <Footer />
+                                    
                                 </div>
     </div>
     
@@ -98,19 +99,21 @@ export default{
         },
 	methods:{
         async init(){
-            this.getCompanies().then(this.getMe())
+            this.getCompanies().then(this.getVendors).then(this.getMe())
         },
         async getCompanies(){
             try{
                     const res = await this.axios.get("/api/companies/").then((res)=>{
-                        this.companies=res.data.results;
-                        if(this.companies.length>0){
-                            this.company=res.data.results[0];
-                        }
-                        else{
-                            this.company=null;
+                        
+                        if(res.data.results.length==0){
                             this.toast.warning("Nessuna azienda registrata");
                         }
+                        else{
+                            this.companies=res.data.results;
+                        }
+                            
+
+                        
                     }).catch((error)=>{
                         if(error.response!=null){
                         this.toast.error(error.response.data.detail);
@@ -122,10 +125,28 @@ export default{
                 };
 
         },
+        async getVendors(){
+            try{
+                for(var i=0; i<this.companies.length;i++){
+                    if(this.companies[i].vendor!=null){
+                        const usres = await this.axios.get("/api/users/"+this.companies[i].vendor+"/").then(userres=>{
+                            this.companies[i].vendor=userres.data;
+                        });
+                    
+                    }
+                }
+            }
+            catch(error) {
+                this.toast.error("Errore indefinito (Azienda)");
+            };
+        },
         async getMe(){
             try{
                     const res = await this.axios.get("/api/me/").then((res)=>{
                         this.user=res.data.results[0];
+                        if(this.user.is_staff){
+                            
+                        }
                         
                     }).catch((error)=>{
                         if(error.response!=null){
@@ -139,7 +160,7 @@ export default{
 
         },
         
-        
+
         
         
         
