@@ -4,9 +4,9 @@
         
         <div class="main-panel">
             <!-- Navbar -->
-            <Nav />
+            <Nav :company.sync="this.company" :companies.sync="this.companies" @update:company="(index) => changeCompany(index)" />
             <!-- End Navbar -->
-            <div class="top"><div class="row col-12"><div class="col-12"><a class="btn btn-warning" @click="this.$router.go(-1)">Indietro</a></div></div></div>
+            <div class="top"><div class="row col-12"><div class="col-12"><a v-if="company" class="btn btn-warning" :href="'/marketplaces/?company='+this.company.id">Indietro</a></div></div></div>
             <div class="center">
                 <div class="container-fluid">
                     
@@ -15,7 +15,7 @@
                         <div class="col-md-6 m-auto">
                             <div class="card ">
                                 <div class="card-header">
-                                    <h4 class="card-title">Aggiungi una nuova Azienda</h4>
+                                    <h4 class="card-title">Aggiungi un nuovo Marketplace</h4>
                                     
                                 </div>
                                 <div class="card-body">
@@ -24,22 +24,32 @@
                                             <div class="table-responsive">
                                                 <table class="table table-company">
                                                     <tbody>
-                                                        <tr><th>Rag. Sociale</th><td><input type="text" v-model="company.name"/></td></tr>
-                                                        <tr><th>P.IVA</th><td><input type="text" max="20" v-model="company.vat"/></td></tr>
-                                                        <tr><th>Indirizzo</th><td><input type="text" v-model="company.address"/></td></tr>
-                                                        <tr><th>Città</th><td><input type="text" v-model="company.city"/></td></tr>
-                                                        <tr><th>CAP</th><td><input type="text" max="5" v-model="company.cap"/></td></tr>
-                                                        <tr><th>Provincia</th><td><input maxlength="2" style="text-transform:uppercase" type="text" v-model="company.province"/></td></tr>
-                                                        <tr><th>Nazione <img v-if="company.country!=null" class="ml-2" :src="'/src/assets/img/flags/'+company.country+'.png'"/></th><td>
-                                                            <select class="custom-select" v-model="company.country">
-                                                                <option selected value="IT">Italia</option>
-                                                                <option value="DE">Germania</option>
-                                                                <option value="ES">Spagna</option>
-                                                                <option value="FR">Francia</option>
-                                                            </select>
-                                                        </td></tr>
-                                                        <tr><th>PEC</th><td><input type="email" v-model="company.pec"/></td></tr>
-                                                        <tr><th>SDI</th><td><input type="text" maxlength="7" v-model="company.sdi"/></td></tr>
+                                                        <tr><th>Account</th><td><input placeholder="L'email del tuo account" type="email" v-model="marketplace.account"/></td></tr>
+                                                        <tr>
+                                                            <th>Nazione<img v-if="marketplace.country!=null" class="ml-2" :src="'/src/assets/img/flags/'+marketplace.country+'.png'"/></th>
+                                                            <td>
+                                                                <select class="custom-select" v-model="marketplace.country">
+                                                                    <option selected value="IT">Italia</option>
+                                                                    <option value="DE">Germania</option>
+                                                                    <option value="ES">Spagna</option>
+                                                                    <option value="FR">Francia</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Tipo Marketplace</th>
+                                                            <td>
+                                                                <select class="custom-select" v-model="marketplace.code">
+                                                                    <option selected value="AMZ">Amazon</option>
+                                                                    <option value="NVX">Nevix</option>
+                                                                    <option value="EBY">Ebay</option>
+                                                                    <option value="WDP">Wordpress</option>
+                                                                    <option value="MAG">Magento</option>
+                                                                    <option value="Prestashop">Prestashop</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -51,7 +61,7 @@
                                             <button class="btn btn-info" v-on:click="this.$router.go(-1)">Annulla</button>
                                         </div>
                                         <div class="col-6 text-right">
-                                            <button class="btn btn-danger" v-on:click="this.addCompany()">Aggiungi</button>
+                                            <button class="btn btn-danger" v-on:click="this.addMarketplace()">Aggiungi</button>
                                         </div>
                                     </div>
                                     
@@ -128,27 +138,21 @@ import Nav from "../../components/Nav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
-            
-            company:{
-                name:null,
-                address:null,
-                city:null,
-                cap:null,
-                province:null,
+            company:null,
+            companies:[],
+            marketplace:{
+                company:null,
                 country:null,
-                pec:null,
-                sdi:null,
-                vat:null,
+                code:null,
+                status:false,
+                website:null,
+                endpoint:null,
+                endpoint_user:null,
+                endpoint_password:null,
+                
             },
-            user:{
-                username:null,
-                first_name:null,
-                last_name:null,
-                profile:{
-                    phone:null,
-                },
-                email:null,
-            }
+            me:null,
+            
             
         }
 }
@@ -161,18 +165,92 @@ export default{
         return { toast }
     },
 	mounted(){
-        
+        this.init();
+
     },
     computed:{
         
         
         },
 	methods:{
+        async init(){
+            this.getCompanies().then(this.getMarketplaces).then(this.getMe())
+        },
+        async getCompanies(){
+            try{
+                    const res = await this.axios.get("/api/companies/").then((res)=>{
+                        
+                        if(res.data.results.length==0){
+                            this.toast.warning("Nessuna azienda registrata");
+                        }
+                        else{
+                            this.companies=res.data.results;
+                            if(this.$route.query.company){
+                                for(var i=0;i<this.companies.length;i++){
+                                    if(this.companies[i].id==this.$route.query.company){
+                                        this.company=this.companies[i];
+                                    }
+                                }
+                            }
+                            else{
+                            this.company=this.companies[0];
+                            }
+                            this.marketplace.company=this.company.id;
+                        }
+                            
+
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
+                    })
+                }
+                catch(error) {
+                    this.toast.error("Errore indefinito (Azienda)");
+                };
+
+        },
+        async getMarketplaces(){
+            try{
+                    const res = await this.axios.get("/api/marketplaces/?company="+this.company.id).then((res)=>{
+                        this.marketplaces=res.data.results;
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
+                    })
+                }
+                catch(error) {
+                    this.toast.error("Errore indefinito (Marketplaces)");
+                };
+
+        },
         
-        addCompany(){
-            this.axios.post("/api/companies/",this.company).then((res)=>{
-                        this.toast.success("Azienda aggiunta");
-                        this.$router.push("/companies");
+        async getMe(){
+            try{
+                    const res = await this.axios.get("/api/me/").then((res)=>{
+                        this.user=res.data.results[0];
+                        if(this.user.is_staff){
+                            
+                        }
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
+                    })
+                }
+                catch(error) {
+                    this.toast.error("Errore indefinito (Recupero Utente)");
+                };
+
+        },
+        addMarketplace(){
+            this.axios.post("/api/marketplaces/?company="+this.company.id,this.marketplace).then((res)=>{
+                        this.toast.success("Marketplace aggiunto");
+                        this.$router.push("/marketplaces?company="+this.company.id);
                     }).catch((error)=>{
                         if(error.response!=null){
                             this.toast.error(String(error.response.status)+" "+String(error.response.statusText));
@@ -189,16 +267,12 @@ export default{
                     })
         },
 
-        addUser(){
-            this.axios.post("/api/users/",this.user).then((res)=>{
-                        this.toast.success("Utente aggiunto");
-                    }).catch((error)=>{
-                        if(error.response!=null){
-                            this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
-                        }
-                    })
-        }
         
+        changeCompany(key){
+            
+            window.location.href='/marketplaces/new?company='+this.companies[key].id;
+            
+        }
         
         
         

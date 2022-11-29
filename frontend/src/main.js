@@ -2,14 +2,26 @@ import { createApp } from 'vue'
 import {createRouter, createWebHistory} from 'vue-router'
 import App from './App.vue'
 import Dashboard from './views/Dashboard.vue'
-import ProductsSimple from './views/products/ProductsSimple.vue'
-import ProductSimple from './views/products/ProductSimple.vue'
+import ProductNew from './views/products/ProductNew.vue'
+import ProductsSimple from './views/products/simple/ProductsSimple.vue'
+import ProductSimple from './views/products/simple/ProductSimple.vue'
+import ProductsConfigurable from './views/products/configurable/ProductsConfigurable.vue'
+import ProductConfigurable from './views/products/configurable/ProductConfigurable.vue'
 import Offers from './views/offers/Offers.vue'
-import Categories from './views/products/Categories.vue'
+import Categories from './views/categories/Categories.vue'
+import NewCategory from './views/categories/NewCategory.vue'
+import Category from './views/categories/Category.vue'
+import Attributes from './views/attributes/Attributes.vue'
+import NewAttribute from './views/attributes/NewAttribute.vue'
+import Attribute from './views/attributes/Attribute.vue'
 import Company from './views/companies/Company.vue'
 import NewCompany from './views/companies/NewCompany.vue'
 import Companies from './views/companies/Companies.vue'
+import Marketplace from './views/marketplaces/Marketplace.vue'
+import NewMarketplace from './views/marketplaces/NewMarketplace.vue'
+import Marketplaces from './views/marketplaces/Marketplaces.vue'
 import User from './views/users/User.vue'
+import NewUser from './views/users/NewUser.vue'
 import Users from './views/users/Users.vue'
 import Permissions from './views/companies/Permissions.vue'
 import Orders from './views/orders/Orders.vue'
@@ -25,7 +37,7 @@ import axios from 'axios'
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import VueCookies from 'vue-cookies'
- 
+
 
 const options = {
     // You can set your default options here
@@ -38,15 +50,27 @@ if($(".selectpicker").length != 0){
 const router = createRouter({
     history: createWebHistory(),
     routes:[
+        {path : '/product/new/', name: 'Nuovo Prodotto', component:ProductNew},
         {path : '/products/simple/', name: 'Lista Prodotti Semplici', component:ProductsSimple},
         {path : '/product/simple/', name: 'Prodotto Semplice', component:ProductSimple, props:true},
-        {path : '/products/categories/', name: 'Categorie', component:Categories},
+        {path : '/products/configurable/', name: 'Lista Prodotti Configurabili', component:ProductsConfigurable},
+        {path : '/product/configurable/', name: 'Prodotto Configurabile', component:ProductConfigurable, props:true},
+        {path : '/categories/', name: 'Categorie', component:Categories},
+        {path : '/categories/new/', name: 'Nuova Categorie', component:NewCategory},
+        {path : '/category/', name: 'Categoria', component:Category},
+        {path : '/attributes/', name: 'Attributi', component:Attributes},
+        {path : '/attributes/new/', name: 'Nuovo Attributo', component:NewAttribute},
+        {path : '/attribute/', name: 'Attributo', component:Attribute},
         
         {path : '/dashboard', name: 'Dashboard', component:Dashboard},
         {path : '/offers/', name: 'Offerte', component:Offers},
         {path : '/companies/', name: 'Aziende', component:Companies},
         {path : '/company/', name: 'Azienda', component:Company},
         {path : '/companies/new/', name: 'Nuova Azienda', component:NewCompany},
+        {path : '/marketplaces/', name: 'Marketplaces', component:Marketplaces,props:true},
+        {path : '/marketplace/', name: 'Marketplace', component:Marketplace,props:true},
+        {path : '/marketplaces/new/', name: 'New Marketplace', component:NewMarketplace,props:true},
+
         
         {path : '/permissions/', name: 'Permessi', component:Permissions},
 
@@ -60,7 +84,10 @@ const router = createRouter({
         {path : '/imports', name: 'Imports', component:Imports},
         {path : '/imports/new/', name: 'ImportsNew', component:ImportsNew},
 
-        {path : '/user', name: 'User', component:User},
+        {path : '/user', name: 'Utente', component:User},
+        {path : '/users/new/', name: 'Nuovo utente', component:NewUser},
+        {path : '/users/', name: 'Utenti', component:Users},
+
 
         { path: '/:pathMatch(.*)*',redirect: '/dashboard/'}
     ]

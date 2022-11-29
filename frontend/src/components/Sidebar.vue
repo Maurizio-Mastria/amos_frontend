@@ -62,28 +62,28 @@
                         <div class="collapse " id="products">
                             <ul class="nav">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/product/new/">
+                                    <a class="nav-link" :href="'/product/new/?company='+this.company.id">
                                         <span class="sidebar-normal">Nuovo</span>
                                     </a>
                                 </li>
                                 <li class="nav-item ">
-                                    <a class="nav-link" href="/products/simple/">
+                                    <a class="nav-link" :href="'/products/simple?company='+this.company.id">
                                         
                                         <span class="sidebar-normal">Semplici</span>
                                     </a>
                                 </li>
                                 <li class="nav-item ">
-                                    <a class="nav-link" href="/products/configurable/">
+                                    <a class="nav-link" :href="'/products/configurable/?company='+this.company.id">
                                         <span class="sidebar-normal">Configurabili</span>
                                     </a>
                                 </li>
                                 <li class="nav-item ">
-                                    <a class="nav-link" href="/products/multiple/">
+                                    <a class="nav-link" :href="'/products/multiple/?company='+this.company.id">
                                         <span class="sidebar-normal">Multipli</span>
                                     </a>
                                 </li>
                                 <li class="nav-item ">
-                                    <a class="nav-link" href="/products/bulk/">
+                                    <a class="nav-link" :href="'/products/bulk/?company='+this.company.id">
                                         <span class="sidebar-normal">Composti</span>
                                     </a>
                                 </li>
@@ -107,12 +107,12 @@
                         <div class="collapse " id="categories">
                             <ul class="nav">
                                 <li class="nav-item ">
-                                    <a class="nav-link" href="/products/categories/">
+                                    <a class="nav-link" :href="'/categories/?company='+this.company.id">
                                         <span class="sidebar-normal">Vedi</span>
                                     </a>
                                 </li>
                                 <li class="nav-item ">
-                                    <a class="nav-link" href="/products/custom_attributes/">
+                                    <a class="nav-link" href="/attributes/">
                                         <span class="sidebar-normal">Attributi</span>
                                     </a>
                                 </li>
@@ -164,11 +164,7 @@ return {
 }
 
 export default{
-    props: {
-        parent: String,
-        child: String,
-        company:Object,
-    },
+    props:['company',],
 
     data(){
         return initialState();
@@ -193,6 +189,14 @@ export default{
                 this.my_permission=res.data;
             })
         },
+        goTo(where){
+        if(this.company){
+            window.location.href="/"+where+"?company="+this.company.id
+        }
+        else{
+            window.location.href="/"+where
+        }
+    },
                 
                 
             

@@ -4,7 +4,7 @@
         
         <div class="main-panel">
             <!-- Navbar -->
-            <Nav />
+            <Nav :company.sync="this.company" :companies.sync="this.companies" @update:company="(index) => changeCompany(index)" />
             <!-- End Navbar -->
             <div class="top"><div class="row col-12"><div class="col-12"><a class="btn btn-warning" @click="this.$router.push('/companies')">Tutte le Aziende</a></div></div></div>
             <div class="center">
@@ -399,7 +399,7 @@ export default{
             data["vendor"]=this.assign_vendor;
             this.axios.put("/api/companies/"+this.company.id+"/",data).then((res)=>{
                         this.toast.success("Venditore assegnato");
-                        
+                        this.$router.go();
                     }).catch((error)=>{
                         if(error.response!=null){
                             this.toast.error(String(error.response.status)+" "+String(error.response.statusText))

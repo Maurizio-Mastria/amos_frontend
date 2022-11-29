@@ -4,9 +4,9 @@
         
         <div class="main-panel">
             <!-- Navbar -->
-            <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
+            <Nav/>
             <!-- End Navbar -->
-            <div class="content">
+            <div class="center">
                 <div class="container-fluid">
                          
                     <div class="row">
@@ -15,11 +15,11 @@
                                 <div class="card-header">
                                     <div class="row">
                                         <div class="col-6">
-                                            <h4 class="card-title">Aziende</h4>
-                                            <p class="card-category">Stato delle tue aziende</p>
+                                            <h4 class="card-title">Utenti</h4>
+                                            <p class="card-category">Tutti gli utenti</p>
                                         </div>
                                         <div class="col-6 text-right">
-                                            <button class="btn btn-info">Aggiungi azienda</button>
+                                            <a href="/users/new/" class="btn btn-info">Aggiungi utente</a>
                                         </div>
                                     </div>
                                 </div>
@@ -28,25 +28,32 @@
                                         <div class="col-md-12">
                                             <div class="table-responsive">
                                                 <table class="table">
+                                                    <thead>
+                                                        <tr><th>User</th><th>Nome</th><th>Cognome</th><th>Email</th><th>Tel</th><th>Ultimo login</th><th>Staff</th><th>Stato</th><th></th></tr>
+                                                    </thead>
                                                     <tbody>
-                                                        <tr><th></th><th>Vendor ID</th><th>Rag. Sociale</th><th>P.IVA</th><th>PEC</th><th>SDI</th><th class="text-center">Stato</th><th></th></tr>
-                                                        <tr v-for="(company,key) in this.companies" :key="key">
-                                                            <td>
-                                                                <div class="flag">
-                                                                    <img :src="'/src/assets/img/flags/'+company.country+'.png'"/> </div>
-                                                            </td>
-                                                            <td><a title="Vedi" :href="'/company?id='+company.id"><b>{{company.vid}}</b></a></td>
-                                                            <td>{{company.name}}</td>
-                                                            <td>{{company.vat}}</td>
-                                                            <td>{{company.pec}}</td>
-                                                            <td>{{company.sdi}}</td>
-                                                            <td class="text-center">
-                                                                <template v-if="company.active"><i class="fa fa-circle text-success"></i></template>
-                                                                <template v-else><i class="fa fa-circle text-danger"></i></template>
-                                                            </td>
-                                                            <td class="text-right"><a class="btn btn-warning" title="Vedi" :href="'/company?id='+company.id">Vedi</a></td>
-                                                        </tr>
                                                         
+                                                        <tr v-for="(value,key) in this.users" :key="key" :value="value">
+                                                            <th>{{value.username}}</th>
+                                                            <td>{{value.first_name}}</td>
+                                                            <td>{{value.last_name}}</td>
+                                                            <td>{{value.email}}</td>
+                                                            <td>{{value.phone}}</td>
+                                                            <td>{{value.last_login}}</td>
+                                                            <td class="text-center">
+                                                                <template v-if="value.is_staff"><i title="Attivo" class="fa fa-circle text-success"></i></template>
+                                                                <template v-else><i title="Disabilitato" class="fa fa-circle text-danger"></i></template>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <template v-if="value.is_active"><i title="Attivo" class="fa fa-circle text-success"></i></template>
+                                                                <template v-else><i title="Disabilitato" class="fa fa-circle text-danger"></i></template>
+                                                            </td>
+                                                            <td class="text-right">
+                                                                <a :href="'/user?id='+value.id+'&company='+this.company.id" rel="tooltip" class="btn btn-warning" title="Vedi profilo">
+                                                                    <i class="fa fa-user"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -61,7 +68,7 @@
                                             
                                         </div>
                                     </div>
-                                    <Footer />
+                                    
                                 </div>
     </div>
     
@@ -78,7 +85,8 @@ function initialState (){
   return {
             company:{},
             companies:[],
-            profiles:[],
+            users:[],
+            user:{}
         }
 }
 export default{
@@ -98,7 +106,7 @@ export default{
         },
 	methods:{
         async init(){
-            this.getCompanies()
+            this.getUsers()
         },
         async getCompanies(){
             try{
@@ -123,18 +131,20 @@ export default{
                 };
 
         },
-        changeCompany(index){
-            this.company=this.companies[index];
-            var id=this.companies[index].id;
-
-            this.axios.get("/api/users/?company="+id).then((res)=>{
-                        this.profiles=res.data.results;
+        async getUsers(){
+            try{
+                    const res = await this.axios.get("/api/users/").then((res)=>{
+                        this.users=res.data.results;                        
                     }).catch((error)=>{
                         if(error.response!=null){
                         this.toast.error(error.response.data.detail);
                         }
                     })
-        }
+                }
+                catch(error) {
+                    this.toast.error("Errore indefinito (Azienda)");
+                };
+        },
         
         
         

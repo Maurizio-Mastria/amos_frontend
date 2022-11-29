@@ -1,65 +1,65 @@
 <template>
     <div>
-        <Sidebar parent="products" child="configurable"/>
+        <Sidebar :company.sync="company" parent="products" child="simple"/>
         <div class="main-panel">
             <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
-            <div class="top" v-if="marketplace">
-                <div class="row">
-                    <div class="col-md-5 pl-5 pt-1 writer" style="text-align:left;"><strong style="font-size:25px;">Prodotti configurabili</strong></div>
-                    <div class="col-md-3" v-if="marketplace" style="text-align:left">
-                        <div class="p-2 writer">
-                            <img class="p-1 me-2 thumbnails" :src="marketplaceImg" />
-                            <b>Sei in {{marketplace._code}} {{marketplace._country}}</b>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="btn-group bootstrap-select dropup">
-                            <button type="button" class="btn dropdown-toggle bs-placeholder btn-default btn-outline" data-toggle="dropdown" role="button" title="Marketplace" aria-expanded="false">
-                                <span class="filter-option pull-left">I tuoi marketplace</span>
-                                <span class="bs-caret">
-                                    <span class="caret"></span>
-                                </span>
-                            </button>
-                            <div class="dropdown-menu open">
-                                <ul class="dropdown-menu inner" role="listbox" aria-expanded="false" style="max-height: 395px; overflow-y: auto; min-height: 0px;">
-                                    <li data-original-index="key" >
-                                        <a type="button" v-on:click="changeMarketplace(key)" v-for="(market,key) in marketplaces" :key="key" tabindex="0" class="" data-tokens="null" role="option" aria-disabled="false" aria-selected="false">
-                                            <span class="text">{{market._code}} - {{market._country}}</span>
-                                            <span class="nc-icon nc-check-2 check-mark"></span>
-                                        </a>
-                                    </li>  
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-1"></div>
-                </div>
-            </div>
-            <div class="center" v-if="marketplace" style="overflow-y:scroll"> 
+            <div class="center" v-if="marketplace" style="overflow-y:scroll">
                 <div class="container-fluid">
-                        <div class="col-12 mt-4 pt-4" v-if="loading"><span class="spinner-border  text-warning" role="status"></span></div>
-                        
-                            <div class="row mt-4 pt-4">
-                                <div class="col-3" style="text-align:left"><a href="#" v-on:click="selectAllProducts(true)" style="color:var(--success);"><i><b>Seleziona tutti</b></i></a><a href="#" v-on:click="selectAllProducts(false)" style="color:var(--danger);"><b><i> / </i></b><i><b>Deseleziona tutti</b></i></a></div>
-                                <div class="col-6" style="font-size:20px;"><a style="color:var(--warning)" v-if="this.previous" href="#" v-on:click="this.page--; this.getProducts()">&lt;&lt;</a><b class="writer m-2">Pagina {{this.page}} </b><a style="color:var(--warning)" href="#" v-if="this.next" v-on:click="this.page++; this.getProducts()">&gt;&gt;</a></div>
-                                <div class="col-3" style="text-align:right"><label >Visualizza prodotti</label>
-                                    <select class="custom-select mb-2" v-on:change="this.page=1; this.limit=$event.target.value; this.getProducts();">
+                    <div class="col-12 row">
+                        <div class="col-2">
+                            <h5 style="font-size:25px;">Prodotti semplici</h5>
+                        </div>
+                        <div class="col-6">
+                            <a :href="'/product/new/?company='+this.company.id" class="btn btn-success">Nuovo</a>
+                        </div>
+                        <div class="col-4" v-if="marketplace" style="text-align:right">
+                                <img class="me-2 thumbnails" :src="marketplaceImg" />
+                                <b>Sei in {{marketplace._code}} {{marketplace._country}}</b>
+                        </div>
+                        <div class="col-12" style="background-color: var(--warning);">
+                            <div class="row">
+                                <div class="col-3 p-2">
+                                    <b>Cambia Marketplace</b>
+                                    <select class="custom-select ml-2" v-on:change="changeMarketplace($event)">
+                                            <option :selected="market.id==this.marketplace.id" v-for="(market,key) in this.marketplaces" :key="key" :value="market.id">{{market._code}} - {{market._country}}</option>
+                                    </select>
+                                </div>
+                                <div class="col-4 p-2 row m-auto">
+                                    <label class="pt-2 pr-2"><b>Cerca</b></label><input type="text" class="form-control" style="width:70%" placeholder="Cerca per sku,gtin,title,descrizione,ecc..." v-on:keyup="sendSearch()" v-model="this.search">
+                                </div>
+                                <div class="col-3 p-2" style="text-align:right"><label class="mr-2"><b>Visualizza prodotti (n.)</b></label>
+                                    <select class="custom-select mr-2" v-on:change="this.page=1; this.limit=$event.target.value; this.getProducts();">
                                         <option value="20">20</option>
                                         <option value="50">50</option>
                                         <option value="100">100</option>
                                         <option value="200">200</option>
                                     </select>
                                 </div>
+
+                            </div>
+                        </div>
+                    </div>
+                        <div class="col-12 mt-4 pt-4" v-if="loading"><span class="spinner-border  text-warning" role="status"></span></div>
+                        
+                            <div class="row mt-4 pt-4">
+                                <div class="col-3" style="text-align:left"><a href="#" v-on:click="selectAllProducts(true)" style="color:var(--success);"><i><b>Seleziona tutti</b></i></a><a href="#" v-on:click="selectAllProducts(false)" style="color:var(--danger);"><b><i> / </i></b><i><b>Deseleziona tutti</b></i></a></div>
+                                <div class="col-6"><ul class="col-12 row" ><template v-for="field,key in this.fields" :key="key"><li class="col-4" style="display: inline;" v-if="field.name!='ID' && field.name!='SKU' && field.name!='Tipo'"><span><input class="mr-2" type="checkbox" v-model="field.show">{{field.name}}</span></li></template></ul></div>
+                                <div class="col-3 text-right">
+                                    <button class="pb-1 btn" v-if="this.previous" v-on:click="this.page--; this.getProducts()">&lt;&lt;</button>
+                                    <b class="m-2">Pagina {{this.page}} </b>
+                                    <button class="pb-1 btn " v-if="this.next" v-on:click="this.page++; this.getProducts()">&gt;&gt;</button>
+                                </div>
+                                
                             </div>
                         <table v-if="products && !loading" class="table table-borderless table-striped table-hover table-sm">
                             <thead>
-                                <tr><th></th><th v-for="(field,key) in fields" :key="key" v-show="field.name!=='ID'">{{field.name}}</th><th></th></tr>    
+                                <tr><th></th><th v-for="(field,key) in fields" :key="key" v-show="field.name!=='ID' && field.show">{{field.name}}</th><th></th></tr>    
                             </thead>
                             <tbody>
                                 <tr v-for="(product,index) in products" :key="index">
                                     <td><input :id="'check'+product.id" type="checkbox" v-on:change="checkbox(product.id,$event)" v-model="checkboxSelected[product.id]"></td>
-                                    <td v-for="(field,key) in fields" :key="key" v-show="key!='id'"><template v-if="key=='sku'"><b>{{product[key]}}</b></template><template v-else>{{product[key]}}</template></td>
-                                    <td><button class="btn btn-info" v-on:click="editProduct(product.id)"><i class="fa fa-eye"></i></button></td>
+                                    <td v-for="(field,key) in fields" :key="key" v-show="key!='id' && field.show"><template v-if="key=='sku'"><b>{{product[key]}}</b></template><template v-else>{{product[key]}}</template></td>
+                                    <td><a class="btn btn-info" :href="'/product/simple/?company='+this.company.id+'&marketplace='+this.marketplace.id+'&id='+product.id"><i class="fa fa-eye"></i></a></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -68,13 +68,9 @@
             <div class="right">
                 <div>
                     <Transition name="slide-fade">
-                        <div id="left-col" class="mt-5" v-if="search || filter || varie">
+                        <div id="left-col" class="mt-5" v-if="filter || varie">
                             
-                            <div v-if="search">
-                                <h5><b>Ricerca</b></h5>
-                                <p><input type="text" class="form-control" placeholder="Cerca per sku,title,descrizione,ecc..."></p>
-                                <p><button type="button" class="mr-2 btn btn-outline">Reset</button><button type="button" class="btn btn-warning ms-2">Cerca</button></p>
-                            </div>
+                            
                             <div v-if="varie">
                                 <h5><b>Applica azione</b></h5>
                                  
@@ -160,7 +156,7 @@
                                             <td><CheckboxButton :ison.sync="filters.attributes.active" @update:ison="(n) => filters.attributes.active=n"/></td>
                                             <td colspan="2">
                                                 <select class="custom-select form-control" v-model="filters.attributes.value" multiple >
-                                                    <option v-for="(val,key) in attributes" :value="val.name">{{val.description}}</option>
+                                                    <option v-for="(val,key) in attributes" :key="key" :value="val.name">{{val.description}}</option>
                                                 </select>
                                                 <span style="font-size:12px">Usa il tasto <b>CTRL</b> per selezioni multiple</span>
                                             </td>
@@ -176,9 +172,7 @@
                     </Transition>
                     <div class="pt-5" v-if="marketplace">
                         <div class="p-2"><b>Azioni</b></div>
-                        <ul class="nav nav-pills flex-column ">
-                            <li class="nav-item"><button class="btn btn-outline" :class="{ active : search  }" v-on:click="expand('search')" title="Cerca"><span class="material-icons">search</span></button></li>
-                        </ul>
+                        
                         
                         <hr>
                         
@@ -199,10 +193,10 @@
 
 <script>
 
-import Sidebar from "../../components/Sidebar.vue";
-import CheckboxButton from "../../components/CheckboxButton.vue";
-import RadioButton from "../../components/RadioButton.vue";
-import Nav from "../../components/Nav.vue";
+import Sidebar from "../../../components/Sidebar.vue";
+import CheckboxButton from "../../../components/CheckboxButton.vue";
+import RadioButton from "../../../components/RadioButton.vue";
+import Nav from "../../../components/Nav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
@@ -215,19 +209,21 @@ function initialState (){
                 id: { name :"ID",show:false },
                 sku:{ name :"SKU",show:true },
                 productType: {name :"Tipo",show:true},
+                gtin:{name :"GTIN",show:true},
+                brand:{name :"Marca",show:true},
                 title:{name :"Titolo", show:true},
                 short_description:{ name:"Descrizione Breve",show:false},
                 description: { name :"Descrizione",show:false},
-                images:{name :"Immagini",show:true},
+                images:{name :"Immagini",show:false},
                 keywords:{name :"Parole chiave",show:false},
                 bullet_point:{name :"Punti di forza (Bullet Point)",show:false},
-                variations:{name :"Variazioni",show:false},
+                attributes:{name :"Attributi",show:true},
             },
             marketplaces:[],
             marketplaceKey:"",
             marketplace:null,
             marketplaceImg:"",
-            search:false,
+            search:"",
             filter:false,
             varie:false,
             filters:{
@@ -236,6 +232,7 @@ function initialState (){
                 description:{value:"", action:"cc", active:false},
                 short_description:{value:"", action:"cc", active:false},
                 images:{ value:true,  active:false},
+
                 keywords:{value :"",active:false},
                 bullet_point:{name :"Punti di forza (Bullet Point)",show:false},
                 attributes:{value:[], active:false}
@@ -290,17 +287,35 @@ export default{
         async getCompanies(){
             try{
                     const res = await this.axios.get("/api/companies/").then((res)=>{
-                        this.companies=res.data.results;
-                        this.company=res.data.results[0];
+                        
+                        if(res.data.results.length==0){
+                            this.toast.warning("Nessuna azienda registrata");
+                        }
+                        else{
+                            this.companies=res.data.results;
+                            if(this.$route.query.company){
+
+                                for(var i=0;i<this.companies.length;i++){
+                                    if(this.companies[i].id==this.$route.query.company){
+                                        this.company=this.companies[i];
+                                    }
+                                }
+                            }
+                            else{
+                                this.company=this.companies[0];
+                            }
+                        }
+                            
+
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
                     })
                 }
                 catch(error) {
-                    if(error.response!=null){
-                        this.toast.error(error.response.data.detail);
-                    }
-                    else{
-                        this.toast.error("Errore indefinito");
-                    }
+                    this.toast.error("Errore indefinito (Azienda)");
                 };
 
         },
@@ -310,7 +325,16 @@ export default{
                     const res = await this.axios.get("/api/marketplaces/?company="+this.company.id)
                     this.marketplaces=res.data.results;
                     if(res.data.results.length>0){
-                        this.marketplace=res.data.results[0];
+                        if(this.$route.query.marketplace!=null){
+                            for(var i=0; i<res.data.results.length;i++){
+                                if(res.data.results[i].id==this.$route.query.marketplace){
+                                    this.marketplace=res.data.results[i];
+                                }
+                            }
+                        }
+                        else{
+                            this.marketplace=res.data.results[0];
+                        }
                         this.marketplaceImg="/imgs/"+this.marketplace.code+".png"
                     }
                     else{
@@ -322,6 +346,7 @@ export default{
                     this.toast.error("Errore indefinito");
                 }  
             }
+            
         },
         async getProducts() {
             if(this.marketplace!==null){
@@ -341,7 +366,7 @@ export default{
                 }
             
             try{
-                const res = await this.axios.get("/api/products/configurable/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&page="+this.page+"&limit="+this.limit+querystring).then((res) => {
+                const res = await this.axios.get("/api/products/simple/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&page="+this.page+"&limit="+this.limit+"&search="+this.search).then((res) => {
                     this.products=[]
                     for(var i=0; i<res.data.results.length; i++){
                         if(res.data.next){
@@ -361,25 +386,39 @@ export default{
                         var product = {
                             "id":obj.id,
                             "sku":obj.sku,
-                            "productType":"Configurabile",
+                            "productType":"Semplice",
+                            "gtin":obj.gtin,
+                            "gtin_type":obj.gtin_type
                         }
                         for(var k=0; k<obj.text_eav.length;k++){
-                            product[obj.text_eav[k].attribute]=obj.text_eav[k].value.substring(0,200);
+                            if(obj.text_eav[k].marketplace==this.marketplace.id){
+                                product[obj.text_eav[k].attribute]=obj.text_eav[k].value.substring(0,200);
+                            }
                         }
                         for(var k=0; k<obj.int_eav.length;k++){
-                            product[obj.int_eav[k].attribute]=obj.int_eav[k].value;
+                            if(obj.int_eav[k].marketplace==this.marketplace.id){
+                                product[obj.int_eav[k].attribute]=obj.int_eav[k].value;
+                            }
                         }
                         for(var k=0; k<obj.char_eav.length;k++){
-                            product[obj.char_eav[k].attribute]=obj.char_eav[k].value;
+                            if(obj.char_eav[k].marketplace==this.marketplace.id){
+                                product[obj.char_eav[k].attribute]=obj.char_eav[k].value;
+                            }
                         }
                         for(var k=0; k<obj.decimal_eav.length;k++){
-                            product[obj.decimal_eav[k].attribute]=obj.decimal_eav[k].value;
+                            if(obj.decimal_eav[k].marketplace==this.marketplace.id){
+                                product[obj.decimal_eav[k].attribute]=obj.decimal_eav[k].value;
+                            }
                         }
                         for(var k=0; k<obj.boolean_eav.length;k++){
-                            product[obj.boolean_eav[k].attribute]=obj.boolean_eav[k].value;
+                            if(obj.boolean_eav[k].marketplace==this.marketplace.id){
+                                product[obj.boolean_eav[k].attribute]=obj.boolean_eav[k].value;
+                            }
                         }
                         for(var k=0; k<obj.url_eav.length;k++){
-                            product[obj.url_eav[k].attribute]=obj.url_eav[k].value;
+                            if(obj.url_eav[k].marketplace==this.marketplace.id){
+                                product[obj.url_eav[k].attribute]=obj.url_eav[k].value;
+                            }
                         }
                         this.products.push(product);
                     };
@@ -408,34 +447,24 @@ export default{
                 }
             }
         },
-        changeCompany(index){
-            var data=initialState();
-            data["companies"]=this.companies;
-            data["company"]=this.companies[index];
-            Object.assign(this.$data,data);
-            this.getMarketplaces().then(this.getProducts).then(this.getAttributes)
+        changeCompany(key){
+            
+            window.location.href='/products/simple?company='+this.companies[key].id;
+            
         },
-        changeMarketplace(index){
-            this.marketplace=this.marketplaces[index]
-            this.marketplaceImg="/imgs/"+this.marketplace.code+".png"
-            this.getProducts();
+        changeMarketplace(event){
+            window.location.href='/products/simple?company='+this.company.id+'&marketplace='+event.target.value
         },
         
         
         expand(value){
-            if(value==="search"){
-                this.search = !this.search;
-                this.filter=false;
-                this.varie=false;
-            }
-            else if(value==="filter"){
+            if(value==="filter"){
                 this.filter= !this.filter;
-                this.search = false;
                 this.varie=false;
             }
             else if(value==="varie"){
                 this.varie= !this.varie;
-                this.search = false;
+                
                 this.filter=false;
             }
         },
@@ -452,7 +481,7 @@ export default{
         },
         
         editProduct(key){
-            this.$router.push("/products/edit?id="+key+"&type=configurable&marketplace="+this.marketplace.id);            
+            this.$router.push("/product/simple?company="+this.company.id+"&id="+key);         
         },
         shutdownProducts(){
 
@@ -460,10 +489,10 @@ export default{
         deleteProducts(){
             var url=null;
             if(this.checkboxAllMarketplace){
-                url="/api/products/delete/?company="+this.company.id+"&type=C";
+                url="/api/products/delete/?company="+this.company.id+"&type=S";
             }
             else{
-                url="/api/products/delete/?company="+this.company.id+"&type=C&marketplace="+this.checkboxMarketplace;
+                url="/api/products/delete/?company="+this.company.id+"&type=S&marketplace="+this.checkboxMarketplace;
             }
             this.axios.post(url,this.checkboxSelected).then((res) => {
                 this.toast.success("Prodotto eliminato")
@@ -489,6 +518,14 @@ export default{
 
             }
         },
+
+        sendSearch(){
+            if(this.search.length==0 || this.search.length>2){
+                this.getProducts();
+            }
+            
+            
+        },  
         
 
 

@@ -67,8 +67,7 @@ nav{
     height: 100vh
 }
 #tabContent{
-  height:550px;
-  overflow-y:scroll !important;
+  
 }
 .sidebar {
     position: fixed;
@@ -112,7 +111,18 @@ nav{
 
 }
 
+.center-top{
+  position:fixed;
+  top:calc(var(--nav-height) - 10px);
+  height:calc(100% - var(--nav-height) + 10px);
+  width:calc(100% - var(--sidebar-width) - 10px);
+  left:var(--sidebar-width);
+  z-index:9;
+  padding-top:20px;
+  
+  overflow-y:scroll !important;
 
+}
 
 .top-a{
   position:fixed;

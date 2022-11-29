@@ -4,8 +4,7 @@
         
         <div class="main-panel">
             <!-- Navbar -->
-            <Nav />
-            <!-- End Navbar -->
+            <Nav :company.sync="this.company" :companies.sync="this.companies" @update:company="(index) => changeCompany(index)" />
             <div class="top"><div class="row col-12"><div class="col-12"><a :href="'/company?id='+this.company.id" class="btn btn-warning">Indietro</a></div></div></div>
             <div class="center">
                 <div class="container-fluid">
@@ -119,8 +118,43 @@ export default{
 	methods:{
         async init(){
             if(this.$route.query.company!=null){
-                this.getCompany().then(this.getUsers).then(this.getMyPermissions)
+                this.getCompanies().then(this.getCompany).then(this.getUsers).then(this.getMyPermissions)
             }
+        },
+        async getCompanies(){
+            try{
+                    const res = await this.axios.get("/api/companies/").then((res)=>{
+                        
+                        if(res.data.results.length==0){
+                            this.toast.warning("Nessuna azienda registrata");
+                        }
+                        else{
+                            this.companies=res.data.results;
+                            if(this.$route.query.company){
+                                for(var i=0;i<this.companies.length;i++){
+                                    if(this.companies[i].id==this.$route.query.company){
+                                        this.company=this.companies[i];
+                                    }
+                                }
+                            }
+                            else{
+                            this.company=this.companies[0];
+                            }
+                            this.marketplace.company=this.company.id;
+                        }
+                            
+
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
+                    })
+                }
+                catch(error) {
+                    this.toast.error("Errore indefinito (Azienda)");
+                };
+
         },
         async getCompany(){
             try{
@@ -211,7 +245,11 @@ export default{
                 this.toast.success("Autorizzazioni salvate");
             }
         },
-
+        changeCompany(key){
+            
+            window.location.href='/permissions/?company='+this.companies[key].id;
+            
+        }
         
         
         

@@ -1,15 +1,27 @@
 <template><nav class="navbar navbar-expand-lg " style="z-index:99999;">
                 <div class="container-fluid">
-                    <div class="navbar-wrapper">
+                    <div class="navbar-wrapper col-6">
                         <div class="navbar-minimize">
                             <button id="minimizeSidebar" class="btn btn-warning btn-fill btn-round btn-icon d-none d-lg-block">
                                 <i class="fa fa-ellipsis-v visible-on-sidebar-regular"></i>
                                 <i class="fa fa-navicon visible-on-sidebar-mini"></i>
                             </button>
                         </div>
-                        <select v-if="companies && companies.length>1" name="Azienda" v-on:change="$emit('update:company',$event.target.selectedIndex)" class="custom-select text-center" title="Seleziona Azienda" style="min-width:300px;">
-                            <option v-for="(val,key) in companies" :key="key" >{{val.name}}</option>
-                        </select>
+                        <div class="col-12 row">
+                            <div class="col-4 p-2">
+                            <span v-if="company" class="pt-2"><b>{{company.name}}</b></span>
+                        </div>
+                        <div class="col-6">
+                        <template v-if="companies && companies.length>1">
+                            <span class="ml-4 p-2">
+                                <span class="mr-2" style="font-size:12px; font-weight:bold; text-transform:uppercase;">Cambia Azienda</span>
+                                <select  name="Azienda" v-on:change="$emit('update:company',$event.target.selectedIndex)" class="custom-select text-center" title="Seleziona Azienda">
+                                    <option v-for="(val,key) in companies" :key="key" :selected="val.id==company.id">{{val.name}}</option>
+                                </select>
+                            </span>
+                        </template>
+                    </div>
+                    </div>
                     </div>
                     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-bar burger-lines"></span>
@@ -25,12 +37,12 @@
                                     <i class="nc-icon nc-globe-2"></i>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <a class="dropdown-item" href="/companies">Aziende</a>
-                                    <a class="dropdown-item" href="/marketplaces">Marketplace</a>
-                                    <a class="dropdown-item" href="/couriers">Corrieri</a>
+                                    <a class="dropdown-item" v-on:click="goTo('companies')">Aziende</a>
+                                    <a class="dropdown-item" v-on:click="goTo('marketplaces')">Marketplace</a>
+                                    <a class="dropdown-item" v-on:click="goTo('couriers')">Corrieri</a>
                                     <a class="dropdown-item" href="#">Submit to live</a>
                                     <li class="divider"></li>
-                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <a class="dropdown-item" href="/users">Utenti</a>
                                 </ul>
                             </li>
                             <li class="dropdown nav-item">
@@ -52,7 +64,7 @@
                                     <i class="nc-icon nc-bullet-list-67"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" v-on:click="goTo('messages')">
                                         <i class="nc-icon nc-email-85"></i> Messages
                                     </a>
                                     <a class="dropdown-item" href="#">
@@ -60,6 +72,10 @@
                                     </a>
                                     <a class="dropdown-item" href="#">
                                         <i class="nc-icon nc-settings-90"></i> Settings
+                                    </a>
+                                    <div class="divider"></div>
+                                    <a class="dropdown-item" v-on:click="goTo('imports')">
+                                        <i class="nc-icon nc-cloud-upload-94"></i> Importa
                                     </a>
                                     <div class="divider"></div>
                                     <a class="dropdown-item" href="#">
@@ -103,6 +119,15 @@ export default {
           console.log("errore");
         });
     },
+    goTo(where){
+        if(this.company){
+            window.location.href="/"+where+"?company="+this.company.id
+        }
+        else{
+            window.location.href="/"+where
+        }
+    },
+    
     
   }
 }

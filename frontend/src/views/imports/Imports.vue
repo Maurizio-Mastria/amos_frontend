@@ -1,54 +1,48 @@
 <template>
     <div>
-        <Sidebar parent="imports"/>
+        <Sidebar :company.sync="company" parent="imports"/>
         <div class="main-panel">
-            <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
+            <Nav :company.sync="this.company" :companies.sync="this.companies" @update:company="(index) => changeCompany(index)" />
             <div class="top">
                 
-                <router-link to="/imports/new" v-if="pendingImport" class="ml-4 btn btn-warning float-left">1 Import in attesa di configurazione</router-link>
-                <router-link to="/imports/new" v-else class="ml-4 float-left btn btn-warning">Nuovo</router-link>
+                <a :href="'/imports/new?company='+this.company.id" class="ml-4 float-left btn btn-warning">Nuovo</a>
                     
                 
             </div>
-            <div class="center"  style="overflow-y:scroll"> 
+            <div class="center"> 
                 <hr>
                 <div class="container-fluid">
                    
                         
                         
-                        <template v-if="imports.length>0 && this.marketplaces!==[]">
+                        <template v-if="imports.length>0">
                             <table class="table table-borderless table-striped table-hover table-sm">
                                 <thead>
                                     <tr><th>Data</th><th>Tipo</th><th>Marketplace</th><th>File</th><th>Stato</th><th></th><th></th></tr>    
                                 </thead>
                                 <tbody>
                                     <tr v-for="(value,index) in imports" :key="index">
-                                        <td>{{value._create}}</td>
-                                        <td>{{value._ftype}}</td>
-                                        <td><template v-for="(val,k) in value.marketplace" :key="k">{{marketplaces.filter(obj=>{return obj.id===val})[0]._code}} - {{marketplaces.filter(obj=>{return obj.id===val})[0]._country}}<br></template></td>
-                                        <td><a href="#" style="color:var(--warning);"  v-on:click="download(value.id)">Download</a></td>
+                                        <td>{{value.create}}</td>
+                                        <td>{{value.ftype}}</td>
+                                        <td>{{value.template}}</td>
+                                        <td><a href="#" class="text-warning" v-on:click="download(value.id)">Download</a></td>
                                         <td>
-                                            <b v-if="value.status=='N' || value.status=='N+'">Nuovo</b>
-                                            <b v-if="value.status=='C'"><router-link to="/imports/new" class="btn btn-warning">Configurazione</router-link></b>
-                                            <b v-if="value.status=='W'">In attesa di elaborazione</b>
-                                            <b v-if="value.status=='E'">Errore</b>
+                                            <b v-if="value.status=='N'">Nuovo</b>
                                             <b v-if="value.status=='R'">In elaborazione</b>
+                                            <b v-if="value.status=='E'">Errore</b>
                                             <b v-if="value.status=='D'">Elaborato</b>
+                                            <b v-if="value.status=='DE'">Elaborato con errori</b>
                                         </td>
                                         <td>
-                                            <span v-if="value.status=='N' || value.status=='N+'" class="spinner-grow spinner-grow-sm text-warning" role="status"></span>
-                                            <span v-if="value.status=='C'" class="spinner-warning"></span>
-                                            <span v-if="value.status=='W'" class="spinner-grow spinner-grow-sm text-success" role="status"></span>
-                                            <span v-if="value.status=='E'" class="spinner-error" role="status"></span>
+                                            <span v-if="value.status=='N'" class="spinner-grow spinner-grow-sm text-warning" role="status"></span>
                                             <span v-if="value.status=='R'" class="spinner-grow spinner-grow-sm text-success" role="status"></span>
+                                            <span v-if="value.status=='E'" class="spinner-error" role="status"></span>
                                             <span v-if="value.status=='D'" class="spinner-done" role="status"></span>
+                                            <span v-if="value.status=='DE'" class="spinner-done" role="status"></span>
                                         </td>
                                         <td>
-                                            <span v-if="value.status=='N' || value.status=='C' || value.status=='W'"><button class="btn btn-danger" v-on:click="deleteImport(value.id)">Annulla</button></span>
-                                            <button  class="btn btn-outline" v-if="value.status=='E'" v-on:click="showModal(index)" data-toggle="modal" data-backdrop="false"  data-target="#exampleModalLong" style="color:var(--error)"><b>Informazioni</b></button>
-                                            <button  class="btn btn-outline" v-if="value.status=='D'" v-on:click="showModal(index)" data-toggle="modal" data-backdrop="false" data-target="#exampleModalLong" style="color:var(--success)"><b>Informazioni</b></button>
+                                            <button  class="btn btn-outline" v-if="value.status=='E' || value.status=='DE'" v-on:click="showModal(index)" data-toggle="modal" data-backdrop="false"  data-target="#exampleModalLong" style="color:var(--error)"><b>Informazioni</b></button>
                                         </td>
-                                        
                                     </tr>
                                 </tbody>
                             </table>
@@ -69,8 +63,8 @@
         <div>
         <table class="table table-striped table-hover table-sm">
             <tr style="background:#e9e9e9"><th>Riga</th><th>Messaggio</th></tr>
-            <tr v-for="(val,key) in modalData.messages" :key="key">
-                <td><b>{{key}}</b></td><td style="text-align:left"><template v-for="(vval,kkey) in val" :key="kkey"><b>{{kkey}}</b> : {{vval}}<br/></template> </td>
+            <tr v-for="(val,key) in JSON.parse(modalData.messages)" :key="key">
+                <td><b>{{key}}</b></td><td>{{val}}</td>
             </tr>
         </table>
         </div>
@@ -143,17 +137,35 @@ export default{
         async getCompanies(){
             try{
                     const res = await this.axios.get("/api/companies/").then((res)=>{
-                        this.companies=res.data.results;
-                        this.company=res.data.results[0];
+                        
+                        if(res.data.results.length==0){
+                            this.toast.warning("Nessuna azienda registrata");
+                        }
+                        else{
+                            this.companies=res.data.results;
+                            if(this.$route.query.company){
+
+                                for(var i=0;i<this.companies.length;i++){
+                                    if(this.companies[i].id==this.$route.query.company){
+                                        this.company=this.companies[i];
+                                    }
+                                }
+                            }
+                            else{
+                                this.company=this.companies[0];
+                            }
+                        }
+                            
+
+                        
+                    }).catch((error)=>{
+                        if(error.response!=null){
+                        this.toast.error(error.response.data.detail);
+                        }
                     })
                 }
                 catch(error) {
-                    if(error.response!=null){
-                        this.toast.error(error.response.data.detail);
-                    }
-                    else{
-                        this.toast.error("Errore indefinito DITTA");
-                    }
+                    this.toast.error("Errore indefinito (Azienda)");
                 };
 
         },
@@ -162,6 +174,8 @@ export default{
                 try{
                     const res = await this.axios.get("/api/marketplaces/?company="+this.company.id)
                     this.marketplaces=res.data.results;
+                    
+                    
                     
                 }  
                 catch (error){
@@ -172,8 +186,7 @@ export default{
         getImports() {
             this.axios.get("/api/imports/?company="+this.company.id).then((res)=>{
                 this.imports=res.data.results
-                this.getPendingImports()
-                window.setTimeout(this.getImports,10000)
+                
             }).catch((error)=>{
                 
             })
@@ -198,22 +211,12 @@ export default{
         },
        
         // VIEWS
-        changeCompany(index){
-            var data=initialState();
-            data["companies"]=this.companies;
-            data["company"]=this.companies[index];
-            Object.assign(this.$data,data);
-            this.getMarketplaces().then(this.getImports)
+        changeCompany(key){
+            
+            window.location.href='/imports?company='+this.companies[key].id;
+            
         },
 
-        deleteImport(id){
-            this.axios.delete("/api/imports/"+id+"/?company="+this.company.id).then((res)=>{
-                this.toast.success("Import annullato");
-                this.$router.go()
-            }).catch((error)=>{
-                this.toast.error(error.response.data.detail)
-            })
-        },
         showModal(index){
             this.modalData=this.imports[index];
         },

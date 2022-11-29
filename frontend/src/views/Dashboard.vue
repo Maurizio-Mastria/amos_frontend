@@ -6,7 +6,7 @@
             <!-- Navbar -->
             <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
             <!-- End Navbar -->
-            <div class="center" v-if="this.company">
+            <div class="center-top" v-if="this.company">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-3 col-sm-6">
@@ -45,7 +45,7 @@
                                         </div>
                                         <div class="col-7">
                                             <div class="numbers">
-                                                <p class="card-category">Revenue</p>
+                                                <p class="card-category">Nuovi</p>
                                                 <h4 class="card-title">$ 1,345</h4>
                                             </div>
                                         </div>
@@ -491,19 +491,32 @@ export default{
         },
 	methods:{
         async init(){
-            this.getCompanies().then(this.getMarketplaces).then(this.getProducts).then(this.getAttributes)
+            this.getCompanies().then(this.getMarketplaces).then(this.getProducts)
         },
         async getCompanies(){
             try{
                     const res = await this.axios.get("/api/companies/").then((res)=>{
-                        this.companies=res.data.results;
-                        if(this.companies.length>0){
-                            this.company=res.data.results[0];
+                        
+                        if(res.data.results.length==0){
+                            this.toast.warning("Nessuna azienda registrata");
                         }
                         else{
-                            this.company=null;
-                            this.$router.push("/companies");
+                            this.companies=res.data.results;
+                            if(this.$route.query.company){
+
+                                for(var i=0;i<this.companies.length;i++){
+                                    if(this.companies[i].id==this.$route.query.company){
+                                        this.company=this.companies[i];
+                                    }
+                                }
+                            }
+                            else{
+                                this.company=this.companies[0];
+                            }
                         }
+                            
+
+                        
                     }).catch((error)=>{
                         if(error.response!=null){
                         this.toast.error(error.response.data.detail);

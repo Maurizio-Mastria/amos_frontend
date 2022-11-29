@@ -312,8 +312,23 @@ export default{
         async getCompanies(){
             try{
                     const res = await this.axios.get("/api/companies/").then((res)=>{
-                        this.companies=res.data.results;
-                        this.company=res.data.results[0];
+                        if(res.data.results.length==0){
+                            this.toast.warning("Nessuna azienda registrata");
+                        }
+                        else{
+                            this.companies=res.data.results;
+                            if(this.$route.query.company){
+
+                                for(var i=0;i<this.companies.length;i++){
+                                    if(this.companies[i].id==this.$route.query.company){
+                                        this.company=this.companies[i];
+                                    }
+                                }
+                            }
+                            else{
+                                this.company=this.companies[0];
+                            }
+                        }
                     })
                 }
                 catch(error) {
@@ -384,42 +399,38 @@ export default{
             
         },
         
-        changeCompany(index){
-            var data=initialState();
-            data["companies"]=this.companies;
-            data["company"]=this.companies[index];
-            Object.assign(this.$data,data);
-            this.getMarketplaces().then(this.getProducts).then(this.getAttributes)
+        changeCompany(key){
+            window.location.href='/orders?company='+this.companies[key].id;
         },
         
-        expand(value){
-            if(value==="search"){
-                this.search = !this.search;
-                this.filter=false;
-                this.varie=false;
-            }
-            else if(value==="filter"){
-                this.filter= !this.filter;
-                this.search = false;
-                this.varie=false;
-            }
-            else if(value==="varie"){
-                this.varie= !this.varie;
-                this.search = false;
-                this.filter=false;
-            }
-        },
-        filtersReset(){
-            this.filters={
-                orders_id:{ value:"", action:"==",active:false},
-                date:{ value:"", action:"==", active:false},
-                marketplace:{value:[], action:"==", active:false},
-                customer:{value:"", action:"cc", active:false},
-                shipping:{ value:[], action:"==", active:false},
-                status:{value:"", active:false}
-            }
-            this.getOrders();
-        },
+        // expand(value){
+        //     if(value==="search"){
+        //         this.search = !this.search;
+        //         this.filter=false;
+        //         this.varie=false;
+        //     }
+        //     else if(value==="filter"){
+        //         this.filter= !this.filter;
+        //         this.search = false;
+        //         this.varie=false;
+        //     }
+        //     else if(value==="varie"){
+        //         this.varie= !this.varie;
+        //         this.search = false;
+        //         this.filter=false;
+        //     }
+        // },
+        // filtersReset(){
+        //     this.filters={
+        //         orders_id:{ value:"", action:"==",active:false},
+        //         date:{ value:"", action:"==", active:false},
+        //         marketplace:{value:[], action:"==", active:false},
+        //         customer:{value:"", action:"cc", active:false},
+        //         shipping:{ value:[], action:"==", active:false},
+        //         status:{value:"", active:false}
+        //     }
+        //     this.getOrders();
+        // },
         
         // editOrder(key){
         //     this.$router.push("/order/"+key);            
