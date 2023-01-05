@@ -1,25 +1,32 @@
 <template>
-    <div>
-        <Sidebar :company.sync="company" parent="dashboard" />
-        
-        <div class="main-panel">
-            <!-- Navbar -->
-            <Nav :company.sync="this.company" :companies.sync="this.companies" @update:company="(index) => changeCompany(index)" />
-            <!-- End Navbar -->
-            <div class="center">
-                <div class="container-fluid">
-                         
+   <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
+
+
+        <div class="content__header content__boxed overlapping">
+            <div class="content__wrap">
+
+                    <!-- Page title and information -->
+                    <h1 class="page-title mb-2">Marketplaces</h1>
+                    <h2 class="h5">Lista dei Marketplaces</h2>
+                    <p></p>
+                    <!-- END : Page title and information -->
+            </div>
+        </div>
+        <div class="content__boxed">
+            <div class="content__wrap">
+                <div class="row">
                     <div class="row">
                         <div class="col-xl-12">
                             <div class="card ">
                                 <div class="card-header">
                                     <div class="row">
                                         <div class="col-6">
-                                            <h4 class="card-title">Marketplaces</h4>
+                                            <h4 class="card-title">Informazioni sui tuoi punti vendita</h4>
                                             <p class="card-category">Stato dei tuoi Marketplace</p>
                                         </div>
-                                        <div class="col-6 text-right">
-                                            <a :href="'/marketplaces/new/?company='+this.company.id" v-if="this.user.is_staff" class="btn btn-info">Aggiungi Marketplace</a>
+                                        <div class="col-6 d-md-flex justify-content-md-end m-auto">
+                                            <a :href="'/marketplaces/new/?company='+this.company.id" v-if="this.user.is_staff" class="btn btn-primary">Aggiungi Marketplace</a>
                                         </div>
                                     </div>
                                 </div>
@@ -72,19 +79,26 @@
                                     </div>
                                     
                                 </div>
+    
+    <Footer/>
+        </section>
+            
+
+        <HeaderNav :company.sync="company" :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="company" @update:collapse="(collapse=false)"/>
     </div>
     
 </template>
 
 <script>
 import Sidebar from "../../components/Sidebar.vue";
-// import Footer from "../../components/Footer.vue";
-// import CheckboxButton from "../components/CheckboxButton.vue";
-// import RadioButton from "../components/RadioButton.vue";
+import HeaderNav from "../../components/HeaderNav.vue";
+import Footer from "../../components/Footer.vue";
 import Nav from "../../components/Nav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
+    collapse:false,
             company:{},
             companies:[],
             marketplaces:[],
@@ -206,59 +220,10 @@ export default{
 
 
     },
-    components:{
-        Sidebar,
-        Nav
-        // CheckboxButton,RadioButton
-        
-    }
+    components:{Sidebar,HeaderNav,Footer}
 
 
     
 
 }
 </script>
-<style scoped>
-
-#left-col{
-    position:fixed;
-    width:400px;
-    right:var(--right-width);
-    
-  padding: 10px ;
-    color: rgb(26, 26, 26);
-    min-height:100px;
-
-  background:
-    linear-gradient(white, white) padding-box,
-    linear-gradient(to right, #FFA534, #FFA534) border-box;
-    
-  border-right : 5px solid transparent;
-  border-left : 5px solid transparent;
-  border-top : 1px solid transparent;
-  border-bottom : 1px solid transparent;
-  
-
-        }
-
-td,th{
-    padding:5px 5px 5px 5px;
-    text-align:center;
-}
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(500px);
-  opacity: 0;
-}
-.z-9{
-    z-index:999999;
-}
-</style>

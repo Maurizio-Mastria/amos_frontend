@@ -1,37 +1,75 @@
 <template>
-    <div>
-        <Sidebar :company.sync="company" parent="products" />
-        <div class="main-panel">
-            <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
-           
-            <div class="center-top" v-if="this.ready">
-                <div class="container-fluid" >
-                    <div class="col-12 row">
-                        <div class="col-1">
-                            <a :href="'/products/simple/?company='+this.company.id+'&marketplace='+this.marketplace.id" class="btn btn-success">Tutti i prodotti</a>
+  <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
+
+
+        <div class="content__header content__boxed overlapping">
+            <div class="content__wrap">
+
+                    <!-- Page title and information -->
+                <h1 class="page-title mb-2">Prodotto semplice</h1>
+                <h2 class="h5">Modifica il tuo prodotto</h2>
+                <p></p>
+                    <!-- END : Page title and information -->
+            </div>
+        </div>
+        <div class="content__boxed" v-if="this.ready">
+            <div class="content__wrap">
+
+                <div class="row p-2 bg-light">
+                    <div class="col-3">
+                        <h5>SKU PRODOTTO: {{this.product.sku}}</h5>
+                    </div>
+                    
+                    <div class="col-1 mb-0 m-auto d-md-flex justify-content-md-end">
+                        <a :href="'/products/simple/?company='+this.company.id+'&marketplace='+this.marketplace.id" class="btn btn-primary">Tutti i prodotti</a>
+                    </div>
+                </div>
+                <div class="row p-2 bg-light">
+                    <div class="col-3">
+                        <b>Cambia Marketplace</b>
+                        <select class="form-select ml-2" v-on:change="changeMarketplace($event)">
+                            <option :selected="market.id==this.marketplace.id" v-for="(market,key) in this.marketplaces" :key="key" :value="market.id">{{market._code}} - {{market._country}} - {{market.account}}</option>
+                        </select>
+                    </div>
+                    
+                </div>
+                <div class="p-2 row bg-light">
+                    <div class="col-5">
+                        <img class="me-2 " :src="marketplaceImg" width="30"/>
+                        <b>Sei in {{marketplace._code}} {{marketplace._country}} - ({{marketplace.account}})</b>
+                    </div>
+                    <div class="col-2">
+                        <div class="row">
+                                <h5>Associato a:</h5>
+                                <template v-if="this.product.item">
+                                    <div>
+                                        <a class="me-2" :href="'/item/?company='+this.company.id+'&id='+this.product.item.id"><b>{{this.product.item.item_code}}</b></a>{{this.product.item.name}}
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <b>Non associato a nessun articolo del magazzino</b>
+                                </template>
+
                         </div>
-                        <div class="col-7">
-                            <h5 class="p-1" style="font-size:25px;">Modifica prodotto {{this.product.sku}}</h5>
-                        </div>
-                        <div class="col-4" v-if="marketplace" style="text-align:right">
-                                <img class="me-2 thumbnails" :src="marketplaceImg" />
-                                <b>Sei in {{marketplace._code}} {{marketplace._country}}</b>
-                        </div>
-                        <div class="col-12" style="background-color: var(--warning);">
-                            <div class="row">
-                                <div class="col-3 p-2">
-                                    <b>Cambia Marketplace</b>
-                                    <select class="custom-select ml-2" v-on:change="changeMarketplace($event)">
-                                            <option :selected="market.id==this.marketplace.id" v-for="(market,key) in this.marketplaces" :key="key" :value="market.id">{{market._code}} - {{market._country}}</option>
-                                    </select>
-                                </div>
-                                <div class="col-9 p-2 ">
-                                    <button class="btn btn-outline" style="color:white; background:grey; float:right; border-color:white;" v-on:click="saveProduct()">Salva bozza</button>
-                                </div>
+
+                    </div>
+                    <div class="col-3">
+                        <div class="row">
+                            <div class="col-1 p-2 d-md-flex justify-content-md-end"><i class="text-danger bi bi-link"></i></div>
+                            <div class="col-11">
+                                <select class="form-select" v-model="this.product.item">
+                                    <option v-for="(item,key) in this.items" :key="key" :value="item">{{item.item_code}} | {{item.name}}</option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                    <div class="row col-12">
+                    <div class="col-2">
+                        <button class="btn btn-outline" style="color:white; background:grey; float:right; border-color:white;" v-on:click="saveProduct()">Salva bozza</button>
+                    </div>
+                </div>
+                <div class="row card mt-4 bg-light">
+                    <div class="row col-12 mt-2 mb-2">
                         <div class="col-12 mt-1 content-full-width">
                             <ul role="tablist" class="nav nav-tabs nav-fill">
                                 <li  class="nav-item">
@@ -46,13 +84,35 @@
                             </ul>
                         </div>
                     </div>
+                    <hr/>
                         <div class="tab-content" id="tabContent">
                             <div class="tab-pane fade show" :class="{ 'active' : tab=='general'}" role="tabpanel" aria-labelledby="general-tab">
-                                <div class="row col-12 pr-5 pl-5">
-                                    <div class="mt-0 ml-auto mr-auto mb-auto row col-5" style="border-right:1px solid blue;">
+                                <div class="row">
+                                    <div class="mt-0 ps-4 pe-4 col-5">
+                                        <!-- Immagine principale -->
+                                        <div class="p-3">
+                                            <h6>Immagine principale</h6>
+                                            <div class="p-5 bg-light mb-1 drop" :class="getClasses0" @dragover.prevent="dragOver(0)" @dragleave.prevent="dragLeave(0)" @drop.prevent="drop($event,0)" style="width:100%; height:400px;" :style="{ 'background-image': 'url(\'/src/assets/img/uploads/yellow.png\')' }">
+                                                <img :src="this.product.marketplace[this.marketplace.id].image0" v-if="this.product.marketplace[this.marketplace.id].image0" style="width:95%; height:95%; overflow:hidden;"/>
+                                                <h1 v-if="image0.wrongFile">File immagine sbagliato o corrotto</h1>
+                                                <svg v-if="image0.wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                                <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <button class="btn btn-outline-secondary ps-2 pe-2 pt-0 pb-0 " v-on:click="moveImage(0,'right')"><i class="bi bi-arrow-down">Sposta</i></button>
+                                                </div>
+                                                <div class="col-6 d-md-flex justify-content-md-end">
+                                                    <button v-on:click="delImages(0)" class="btn btn-outline-danger ps-2 pe-2 pt-0 pb-0" ><i class="bi bi-trash"></i>Cancella</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="p-0 m-0 row">
-                                        <div class="col-3 p-0 pt-3">
-                                            <div v-for="i in (1,3)" :key="i" class="m-1" style="width:100px; display:inline-block; text-align:center;">
+                                            
+                                            <div v-for="i in (1,7)" :key="i" class="m-1" style="width:200px; display:inline-block; text-align:center;">
+                                                <h6>Immagine secondaria {{i}}</h6>
                                                 <div class="drop" :class="this['getClasses'+i]" @dragover.prevent="dragOver(i)" @dragleave.prevent="dragLeave(i)" @drop.prevent="drop($event,i)" style="width:100%;height:100px; background-image:url('/src/assets/img/uploads/blue.png'); margin:auto;">
                                                     <img :src="this.product.marketplace[this.marketplace.id]['image'+i]" v-if="this.product.marketplace[this.marketplace.id]['image'+i]"/>
                                                     <h1 v-if="this['image'+i].wrongFile">File immagine sbagliato o corrotto</h1>
@@ -62,72 +122,53 @@
                                                     </svg>
                                                     
                                                 </div>
-                                                <div class="pt-1">
-                                                    <button class="btn  btn-danger btn-outline float-left p-0" v-on:click="delImages(i)"><i class="fa fa-trash"></i></button>
-                                                    <button class="btn  float-right p-0 "  v-on:click="moveImage(i,'left')"><i v-if="i!=1" class="fa fa-arrow-up" ></i><i v-else class="fa fa-arrow-right"></i></button>
-                                                    <button class="btn btn-warning float-right mr-2 p-0"  v-on:click="moveImage(i,'right')" ><i class="fa fa-arrow-down"></i></button>
+                                                <div class="row pt-1">
+                                                    <div class="col-6">
+                                                        <button class="btn btn-outline-secondary  ps-2 pe-2 pt-0 pb-0 m-1"  v-on:click="moveImage(i,'left')"><i v-if="i==1" class="bi bi-arrow-up" ></i><i v-else class="bi bi-arrow-left"></i></button>
+                                                        <button class="btn btn-outline-secondary  ps-2 pe-2 pt-0 pb-0 m-1"  v-on:click="moveImage(i,'right')" ><i class="bi bi-arrow-right"></i></button>
+                                                        </div>
+                                                        <div class="col-6 d-md-flex justify-content-md-end">
+                                                            <button class="btn btn-outline-danger ps-2 pe-2 pt-0 pb-0 m-1" v-on:click="delImages(i)"><i class="bi bi-trash"></i></button>
+
+                                                        </div>
                                                 </div>
                                                 
+                                            </div>
+                                            <div class="m-1" style="width:200px; display:inline-block;">
+                                                
+                                                <h6>Miniatura</h6>
+                                                <div class="drop" :class="this['getClasses8']" @dragover.prevent="dragOver(8)" @dragleave.prevent="dragLeave(8)" @drop.prevent="drop($event,8)" style="width:100%;height:100px; background-image:url('/src/assets/img/uploads/violet.png'); margin:auto;">
+                                                    <img :src="this.product.marketplace[this.marketplace.id]['image8']" v-if="this.product.marketplace[this.marketplace.id]['image8']"/>
+                                                    <h1 v-if="this['image8'].wrongFile">File immagine sbagliato o corrotto</h1>
+                                                    <svg v-if="this['image8'].wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                                    <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
+                                                    </svg>
+                                                    
+                                                </div>
+                                                <div class="row pt-1">
+                                                    <div class="col-6 d-md-flex justify-content-md-start">
+                                                        <button class="btn btn-outline-secondary  ps-2 pe-2 pt-0 pb-0 m-1"  v-on:click="moveImage(8,'left')"><i class="bi bi-arrow-left"></i></button>
+                                                    </div>
+                                                    <div class="col-6 d-md-flex justify-content-md-end">
+                                                        <button class="btn btn-outline-danger ps-2 pe-2 pt-0 pb-0 m-1" v-on:click="delImages(8)"><i class="bi bi-trash"></i></button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         
-                                        </div>
-                                        <div class="col-7 p-0">
-                                            <div style="width:400px; height:400px;">
-                                                <div class="mb-1 drop" :class="getClasses0" @dragover.prevent="dragOver(0)" @dragleave.prevent="dragLeave(0)" @drop.prevent="drop($event,0)" style="width:100%; height:100%;" :style="{ 'background-image': 'url(\'/src/assets/img/uploads/yellow.png\')' }">
-                                                    <img :src="this.product.marketplace[this.marketplace.id].image0" v-if="this.product.marketplace[this.marketplace.id].image0" style="width:95%; height:95%; overflow:hidden;"/>
-                                                    <h1 v-if="image0.wrongFile">File immagine sbagliato o corrotto</h1>
-                                                    <svg v-if="image0.wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-                                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                                                    <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <button v-on:click="delImages(0)" class="btn btn-outline btn-danger float-left p-1" ><i class="fa fa-trash"></i></button>
-                                                    <button class="btn btn-warning p-1 float-right" v-on:click="moveImage(0,'right')"><i class="fa fa-arrow-up" style="transform:rotate(-45deg);"></i></button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 p-0">
-                                                <div v-for="i in 4" :key="i" class="m-1" style="width:100px; height:80px; display:inline-block; text-align:center;" >
-                                                    <div class="drop" :class="this['getClasses'+(i+3)]" @dragover.prevent="dragOver((i+3))" @dragleave.prevent="dragLeave((i+3))" @drop.prevent="drop($event,(i+3))" style="width:100px;height:100px; margin:auto; background-image:url('/src/assets/img/uploads/blue.png');">
-                                                        <img :src="this.product.marketplace[this.marketplace.id]['image'+(i+3)]" v-if="this.product.marketplace[this.marketplace.id]['image'+(i+3)]"/>
-                                                        <h1 v-if="this['image'+(i+3)].wrongFile">File immagine sbagliato o corrotto</h1>
-                                                        <svg v-if="this['image'+(i+3)].wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-                                                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                                                        <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
-                                                        </svg>
-                                                        
-                                                    </div>
-                                                    <div class="pt-1">
-                                                        <button class="btn btn-danger btn-outline float-left p-0" v-on:click="delImages((i+3))"><i class="fa fa-trash"></i></button>
-                                                        <button class="btn btn-warning float-right p-0"  v-on:click="moveImage((i+3),'right')" v-if="i+3<8"><i  class="fa fa-arrow-right"></i></button>
-                                                        <button class="btn float-right p-0 mr-2"  v-on:click="moveImage((i+3),'left')" ><i v-if="i+3>4" class="fa fa-arrow-left"></i><i v-else class="fa fa-arrow-up"></i></button>
-                                                    </div>
-                                                </div>
-                                                <div class="m-1" style="width:100px; height:80px; display:inline-block; text-align:center;">
-                                                <div class="mb-1 drop" :class="getClasses8" @dragover.prevent="dragOver(8)" @dragleave.prevent="dragLeave(9)" @drop.prevent="drop($event,8)" style="width:100px; height:100px; margin:auto; background-image:url('/src/assets/img/uploads/violet.png');">
-                                                    <img :src="this.product.marketplace[this.marketplace.id].image8" v-if="this.product.marketplace[this.marketplace.id].image8" />
-                                                    <h1 v-if="image0.wrongFile">File immagine sbagliato o corrotto</h1>
-                                                    <svg v-if="image0.wrongFile" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-                                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                                                    <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54A.505.505 0 0 1 1 12.5v-9a.5.5 0 0 1 .5-.5h13z"/>
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <button v-on:click="delImages(8)" class="btn btn-outline btn-danger float-left p-0" ><i class="fa fa-trash"></i></button>
-                                                    <button class="btn btn-warning p-0 mr-2 float-right" v-on:click="moveImage(8,'left')"><i class="fa fa-arrow-left"></i></button>
-                                                </div>
-                                            </div>
-                                                
-                                                
-                                        </div>
+                                       
+                                       
                                     </div>
                                         
                                 </div>
                                     
                                   
-                                    <div class="row col-7 p-4 m-auto" >
-                                        <div class="col-12 pb-0 mb-0">
+                                    <div class="row col-7  m-auto ">
+                                        <div class="col-12 pb-0 p-2 card">
+                                            <div class="card-header">
+                                                <h6 class="card-title">Obbligatori</h6>
+                                            </div>
+                                            <div class="card-body">
                                             <table class="table table-sm table-responsive table-general">
                                                 <tr><th>SKU</th><td>
                                                     <template v-if="this.product.id">
@@ -141,7 +182,7 @@
                                                     <input class="form-control" type="text" v-model="product.brand">
                                                 </td></tr>
                                                 <tr><th>GTIN</th><td><div class="input-group"><div class="input-group-prepend">
-                                                                                                    <select class="custom-select mr-2" v-model="product.gtin_type">
+                                                                                                    <select class="form-select mr-2" v-model="product.gtin_type">
                                                                                                         <option value="NOGTIN">ESENTE</option>
                                                                                                         <option value="EAN">EAN</option>
                                                                                                         <option value="ISBN">ISBN</option>
@@ -153,28 +194,47 @@
                                                 </tr>
                                                 
                                                 <tr><th>Titolo</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].title"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Titolo (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_title}}</td></tr>
-                                                <tr><th>Descrizione breve</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].short_description"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Descrizione breve (calcolata)</th><td class="pt-0 pb-0">{{this.calculated_short_description}}</td></tr>
-                                                <tr><th>Parole chiave</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].keywords"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Parole chiave (calcolate)</th><td class="pt-0 pb-0">{{this.calculated_keywords}}</td></tr>
-                                                <tr><th>Bullet point 1</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point1"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Bullet Point 1 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point1}}</td></tr>
-                                                <tr><th>Bullet point 2</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point2"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Bullet Point 2 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point2}}</td></tr>
-                                                <tr><th>Bullet point 3</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point3"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Bullet Point 3 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point3}}</td></tr>
-                                                <tr><th>Bullet point 4</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point4"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Bullet Point 4 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point4}}</td></tr>
-                                                <tr><th>Bullet point 5</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point5"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Bullet Point 5 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point5}}</td></tr>
-                                                <tr><th>Bullet point 6</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point6"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Bullet Point 6 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point6}}</td></tr>
-                                                <tr><th>Bullet point 7</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point7"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Bullet Point 7 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point7}}</td></tr>
-                                                <tr><th>Bullet point 8</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point8"></td></tr>
-                                                <tr class="small text-danger"><th class="pt-0 pb-0">Bullet Point 8 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point8}}</td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Titolo (calcolato)<i class="bi bi-question" style="font-size:1.3rem;"></i></th><td class="pt-0 pb-0">{{this.calculated_title}}</td></tr>
                                             </table>
+                                            </div></div>
+                                                <div class="col-12 pb-0 mt-3 mb-0 p-2 card">
+                                            <div class="card-header">
+                                                <h6 class="card-title">Necessari</h6>
+                                            </div>
+                                            <div class="card-body">
+                                            <table class="table table-sm table-responsive table-general">
+                                                <tr><th>Descrizione breve</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].short_description"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Descrizione breve (calcolata)</th><td class="pt-0 pb-0">{{this.calculated_short_description}}</td></tr>
+                                                <tr><th>Parole chiave</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].keywords"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Parole chiave (calcolate)</th><td class="pt-0 pb-0">{{this.calculated_keywords}}</td></tr>
+                                            </table>
+                                        </div>
+                                        </div>
+
+                                            <div class="col-12 pb-0 mt-3 mb-0 p-2 card">
+                                            <div class="card-header">
+                                                <h6 class="card-title">Facoltativi</h6>
+                                            </div>
+                                            <div class="card-body">
+                                            <table class="table table-sm table-responsive table-general">
+                                                <tr><th>Bullet point 1</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point1"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Bullet Point 1 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point1}}</td></tr>
+                                                <tr><th>Bullet point 2</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point2"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Bullet Point 2 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point2}}</td></tr>
+                                                <tr><th>Bullet point 3</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point3"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Bullet Point 3 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point3}}</td></tr>
+                                                <tr><th>Bullet point 4</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point4"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Bullet Point 4 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point4}}</td></tr>
+                                                <tr><th>Bullet point 5</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point5"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Bullet Point 5 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point5}}</td></tr>
+                                                <tr><th>Bullet point 6</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point6"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Bullet Point 6 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point6}}</td></tr>
+                                                <tr><th>Bullet point 7</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point7"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Bullet Point 7 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point7}}</td></tr>
+                                                <tr><th>Bullet point 8</th><td><input class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].bullet_point8"></td></tr>
+                                                <tr class="small text-danger"><th class="pt-0 pb-0" title="Usa le variabili della sezione Attributi">Bullet Point 8 (calcolato)</th><td class="pt-0 pb-0">{{this.calculated_bullet_point8}}</td></tr>
+                                            </table>
+                                        </div>
                                         </div>
                                        
                                         
@@ -184,13 +244,16 @@
                                 </div>
                                 <div class="row col-12 pr-5 pl-5">
                                     <div class="col-12 p-3" >
-                                        <h6>Descrizione HTML</h6>
-                                        <textarea class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].description" style="min-height:200px"></textarea>
+                                        <h6 title="Usa le variabili della sezione Attributi">Descrizione HTML</h6>
+                                        <code>
+                                            <textarea class="form-control" type="text" v-model="product.marketplace[this.marketplace.id].description" style="min-height:200px"></textarea>
+                                        </code>
                                         <hr/>
                                     </div>
                                     <div class="m-auto col-12">
-                                        <h6>Vista descrizione</h6>
+                                        <h6 class="text-danger">Vista descrizione</h6>
                                         <div style="background:white;" class="p-4" v-html="this.calculated_description"></div>
+                                        
                                     </div>
                                 </div>
                                     
@@ -199,7 +262,6 @@
                         </div>
                         
                         <div class="tab-pane fade show" :class="{ 'active' : tab=='attribute'}"  role="tabpanel" aria-labelledby="attribute-tab">
-                            <div class="card">
                                 <template v-if="this.category">
                                 <div class="card-header mb-4">
                                     <div class="card-title">{{this.category.title}}<a class="float-right btn btn-warning" :href="'/category/?company='+this.company.id+'&marketplace='+this.marketplace.id+'&id='+this.category.id">Vai alla categoria</a></div>
@@ -221,7 +283,7 @@
                                                         <td>
                                                             <div class="input-group">
                                                                 <div class="input-group-prepend">
-                                                                    <select class="custom-select mr-2" v-model="this.product.marketplace[this.marketplace.id][attribute.name]['unit']">
+                                                                    <select class="form-select mr-2" v-model="this.product.marketplace[this.marketplace.id][attribute.name]['unit']">
                                                                         <option value="mm">mm</option>
                                                                         <option value="cm">cm</option>
                                                                         <option value="m">m</option>
@@ -271,9 +333,12 @@
                                 </div>
                             </template>
                             <template v-else>
-                                <h6>Il prodotto non è associato a nessuna categoria</h6>
+                                <div class="row mt-4">
+                                    <div class="col-12 m-4">
+                                        <h6 style="display: inline;">Il prodotto in questo marketplace non ha ancora una categoria</h6><a :href="('/categories?company='+this.company.id+'&marketplace='+this.marketplace.id)" class="btn btn-primary ms-3">Vai alle categorie</a>
+                                    </div>
+                                </div>
                             </template>
-                            </div>
                         </div>
                         
                         
@@ -297,8 +362,8 @@
                                                 </ul>                                        
                                             </div>
                                             <div class="col-7">
-                                                Scegli i Marketplace sui quali vuoi copiare
-                                                <select class="custom-select" multiple style="width:100%;height:150px;" v-model="this.marketTo">
+                                                Scegli il Marketplace di destinazione
+                                                <select class="form-select" v-model="this.marketTo" v-on:change="this.getAbstractProductsTo()">
                                                     <option v-for="market,key in this.marketplaces" :value="market.id" :key="key">{{market._code}} {{market._country}} ({{market.account}})</option>
                                                 </select>
                                             </div>
@@ -307,26 +372,28 @@
                                             </div>
                                             <div class="col-3 mt-4">
                                                 <b>Semplici</b>
-                                                <select class="custom-select mt-2" multiple style="width:100%;height:150px;" v-model="this.productsTo.simple">
-                                                    <option v-for="product,key in this.abstractProducts.simple" :value="product.id" :key="key">{{product.sku}}</option>
+                                                <select class="form-select mt-2" multiple style="width:100%;height:150px;" v-model="this.productsTo.simple">
+                                                    <template v-for="product,key in this.abstractProductsTo.simple" :key="key">
+                                                        <option v-if="product.id!=this.product.id" :value="product.id" >{{product.sku}}</option>
+                                                    </template>
                                                 </select>
                                             </div>
                                             <div class="col-3 mt-4">
                                                 <b>Configurabili</b>
-                                                <select class="custom-select mt-2" multiple style="width:100%;height:150px;" v-model="this.productsTo.configurable">
-                                                    <option v-for="product,key in this.abstractProducts.configurable" :value="product.id" :key="key">{{product.sku}}</option>
+                                                <select class="form-select mt-2" multiple style="width:100%;height:150px;" v-model="this.productsTo.configurable">
+                                                    <option v-for="product,key in this.abstractProductsTo.configurable" :value="product.id" :key="key">{{product.sku}}</option>
                                                 </select>
                                             </div>
                                             <div class="col-3 mt-4">
                                                 <b>Multipli</b>
-                                                <select class="custom-select mt-2" multiple style="width:100%;height:150px;" v-model="this.productsTo.multiple">
-                                                    <option v-for="product,key in this.abstractProducts.multiple" :value="product.id" :key="key">{{product.sku}}</option>
+                                                <select class="form-select mt-2" multiple style="width:100%;height:150px;" v-model="this.productsTo.multiple">
+                                                    <option v-for="product,key in this.abstractProductsTo.multiple" :value="product.id" :key="key">{{product.sku}}</option>
                                                 </select>
                                             </div>
                                             <div class="col-3 mt-4">
                                                 <b>Composti</b>
-                                                <select class="custom-select mt-2" multiple style="width:100%;height:150px;" v-model="this.productsTo.bulk">
-                                                    <option v-for="product,key in this.abstractProducts.bulk" :value="product.id" :key="key">{{product.sku}}</option>
+                                                <select class="form-select mt-2" multiple style="width:100%;height:150px;" v-model="this.productsTo.bulk">
+                                                    <option v-for="product,key in this.abstractProductsTo.bulk" :value="product.id" :key="key">{{product.sku}}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -362,7 +429,7 @@
                                         <div class="col-3">
                                             <b>Scegli il Marketplace dal quale vuoi copiare</b>
                                             
-                                            <select class="custom-select mt-2" style="width:100%;" v-model="this.marketFrom">
+                                            <select class="form-select mt-2" style="width:100%;" v-model="this.marketFrom" v-on:change="this.getAbstractProductsFrom">
                                                 <option v-for="market,key in this.marketplaces" :value="market.id" :key="key">{{market._code}} {{market._country}} ({{market.account}})</option>
                                             </select>
                                         </div>
@@ -372,32 +439,32 @@
                                                 <tr>
                                                     <th>Semplici</th>
                                                     <td>
-                                                        <select class="custom-select mt-2" style="width:100%;" v-model="this.productFrom.simple" v-on:change="this.resetOtherProductFrom('simple')">
-                                                            <option v-for="product,key in this.abstractProducts.simple" :key="key" :value="product.id">{{product.sku}}</option>
+                                                        <select class="form-select mt-2" style="width:100%;" v-model="this.productFrom.simple" v-on:change="this.resetOtherProductFrom('simple')">
+                                                            <option v-for="product,key in this.abstractProductsFrom.simple" :key="key" :value="product.id">{{product.sku}}</option>
                                                         </select>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th>Configurabili</th>
                                                     <td>
-                                                        <select class="custom-select mt-2" style="width:100%;" v-model="this.productFrom.configurable" v-on:change="this.resetOtherProductFrom('configurable')">
-                                                            <option v-for="product,key in this.abstractProducts.configurable" :key="key" :value="product.id">{{product.sku}}</option>
+                                                        <select class="form-select mt-2" style="width:100%;" v-model="this.productFrom.configurable" v-on:change="this.resetOtherProductFrom('configurable')">
+                                                            <option v-for="product,key in this.abstractProductsFrom.configurable" :key="key" :value="product.id">{{product.sku}}</option>
                                                         </select>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th>Multipli</th>
                                                     <td>
-                                                        <select class="custom-select mt-2" style="width:100%;" v-model="this.productFrom.multiple" v-on:change="this.resetOtherProductFrom('multiple')">
-                                                            <option v-for="product,key in this.abstractProducts.multiple" :key="key" :value="product.id">{{product.sku}}</option>
+                                                        <select class="form-select mt-2" style="width:100%;" v-model="this.productFrom.multiple" v-on:change="this.resetOtherProductFrom('multiple')">
+                                                            <option v-for="product,key in this.abstractProductsFrom.multiple" :key="key" :value="product.id">{{product.sku}}</option>
                                                         </select>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th>Composti</th>
                                                     <td>
-                                                        <select class="custom-select mt-2" style="width:100%;" v-model="this.productFrom.bulk" v-on:change="this.resetOtherProductFrom('bulk')">
-                                                            <option v-for="product,key in this.abstractProducts.bulk" :key="key" :value="product.id">{{product.sku}}</option>
+                                                        <select class="form-select mt-2" style="width:100%;" v-model="this.productFrom.bulk" v-on:change="this.resetOtherProductFrom('bulk')">
+                                                            <option v-for="product,key in this.abstractProductsFrom.bulk" :key="key" :value="product.id">{{product.sku}}</option>
                                                         </select>
                                                     </td>
                                                 </tr>
@@ -417,19 +484,23 @@
                         </div>
                     </div>
                     
-                </div>
             </div>
     </div>
 </div>
-    
+<Footer/>
+        </section>
+            
+
+        <HeaderNav :company.sync="company" :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="dashboard" @update:collapse="(collapse=false)"/>
+    </div>
 </template>
 
 <script>
 const AUTH_TOKEN = "51fb50cfbedaf479a0080615e77cc82392628a21";
 import Sidebar from "../../../components/Sidebar.vue";
-import CheckboxButton from "../../../components/CheckboxButton.vue";
-import RadioButton from "../../../components/RadioButton.vue";
-import Nav from "../../../components/Nav.vue";
+import HeaderNav from "../../../components/HeaderNav.vue";
+import Footer from "../../../components/Footer.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {  
@@ -444,11 +515,18 @@ function initialState (){
             marketplace:null,
             marketplaceImg:"",
             category:null,
+            collapse:false,
             company:{},
             companies:[],
-
+            items:[],
             product:{},
-            abstractProducts:{
+            abstractProductsFrom:{
+                "simple":{},
+                "configurable":{},
+                "multiple":{},
+                "bulk":{}
+            },
+            abstractProductsTo:{
                 "simple":{},
                 "configurable":{},
                 "multiple":{},
@@ -670,7 +748,7 @@ export default{
                             value=this.product.marketplace[this.marketplace.id][search]
                         }
                         if(value==undefined){
-                            value="";
+                            return text
                         }
                         var re=new RegExp("%"+search+"%",'g')
                         text=text.replace(re,value)
@@ -678,9 +756,10 @@ export default{
                             var reUnit=new RegExp("%"+search+"_unit%",'g')
                             text=text.replace(reUnit,unit)
                         }
-                        if(type=="TEXT" || type=="CHAR"){
+                        if((type=="TEXT" || type=="CHAR")){
                             var reUpper=new RegExp("%"+search.toUpperCase()+"%",'g')
                             var reTitled=new RegExp("%"+search[0].toUpperCase()+search.slice(1)+"%",'g')
+                            
                             text=text.replace(reUpper,value.toUpperCase())
                             text=text.replace(reTitled,value[0].toUpperCase()+value.slice(1))            
                         }
@@ -689,6 +768,8 @@ export default{
                     return text
                 }
             }
+            return text
+            
         },
 
         dragOver(id){
@@ -753,7 +834,7 @@ export default{
 
 
         async init(){
-            this.getCompanies().then(this.getMarketplaces).then(this.getProduct).then(this.getProductCategory).then(this.getAbstractProducts)
+            this.getCompanies().then(this.getMarketplaces).then(this.getProduct).then(this.getProductCategory).then(this.getItems)
         },
         async getCompanies(){
             try{
@@ -818,26 +899,27 @@ export default{
             }
         },
         
-        
+        async getItems(){
+            await this.axios.get("/api/warehouse/items/?company="+this.company.id).then((res)=>{
+                    this.items=res.data.results;
+            }).catch((error)=>{
+                this.toast.error("Errore nel recuperare gli articoli del magazzino");
+            })
+        }, 
         
         async getCategories(){
-            
-            
-                
-            this.axios.get("/api/simplify/products/categories/?company="+this.company.id).then((res)=>{
+            await this.axios.get("/api/simplify/products/categories/?company="+this.company.id).then((res)=>{
                     this.categories=res.data.results;
-                    
             }).catch((error)=>{
-                this.toast.error(error);
+                this.toast.error("Errore nel recuperare le categorie");
             })
-        
         },
         async getProductCategory(){
-            this.axios.get("/api/products/categories/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&simple="+this.$route.query.id).then((res)=>{
+            const res = await this.axios.get("/api/products/categories/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&simple="+this.$route.query.id).then((res)=>{
                 if(res.data.results.length>0){
                     this.category=res.data.results[0];
                     
-                    for(const [id,attribute] of Object.entries(this.category.attributes)){
+                    for(var [id,attribute] of Object.entries(this.category.attributes)){
                         if(attribute.type=="DECIMAL"){
                             if(!(attribute.name in this.product.marketplace[this.marketplace.id])){
                                 this.product.marketplace[this.marketplace.id][attribute.name]={}
@@ -848,7 +930,7 @@ export default{
 
                     
             }).catch((error)=>{
-                this.toast.error(error);
+                this.toast.error("Errore nel recuperare la categoria");
             })
         },
         
@@ -860,14 +942,14 @@ export default{
             
             
                 
-                this.axios.get("/api/products/simple/"+this.$route.query.id+"/?company="+this.company.id).then((res)=>{
+                const res = await this.axios.get("/api/products/simple/"+this.$route.query.id+"/?company="+this.company.id+"&marketplace="+this.marketplace.id).then((res)=>{
                         
                         
                         this.product.id=res.data.id;
                         this.product.sku=res.data.sku;
                         this.product.gtin_type=res.data.gtin_type;
                         this.product.gtin=res.data.gtin;
-
+                        this.product.item=res.data.item;
                         this.product.marketplace={};
                         this.product.marketplace[this.marketplace.id]={};
                         
@@ -913,11 +995,11 @@ export default{
             
         },
         changeCompany(index){
-            window.location.href='/products/simple?company='+this.companies[key].id;
+            window.location.href='/products/simple?company='+this.companies[index].id;
             
         },
         changeMarketplace(event){
-            window.location.href='/product/simple?company='+this.company.id+'&marketplace='+event.target.value+'&id='+this.product.id
+            window.location.href='/products/simple?company='+this.company.id+'&marketplace='+event.target.value
         },
         
         
@@ -926,7 +1008,7 @@ export default{
             
             this.axios.put("/api/products/simple/"+this.product.id+"/?company="+this.company.id+"&marketplace="+this.marketplace.id,this.product).then((res)=>{
                 this.toast.success("Prodotto salvato");
-                this.getProduct().then(this.getProductCategory).then(this.getAbstractProducts)
+                this.getProduct().then(this.getProductCategory)
             }).catch((error)=>{
                 this.toast.error(error.response.data.detail)
             })
@@ -935,30 +1017,49 @@ export default{
             
         },
 
-        async getAbstractProducts(){
-            this.axios.get("/api/abstract/simple/?company="+this.company.id).then((res)=>{
-              this.abstractProducts["simple"]=res.data.results;
+        async getAbstractProductsTo(){
+            this.axios.get("/api/abstract/simple/?company="+this.company.id+"&marketplace="+this.marketTo).then((res)=>{
+              this.abstractProductsTo["simple"]=res.data.results;
             }).catch((error)=>{
                 this.toast.error(error);
             });
-            this.axios.get("/api/abstract/configurable/?company="+this.company.id).then((res)=>{
-              this.abstractProducts["configurable"]=res.data.results;
+            this.axios.get("/api/abstract/configurable/?company="+this.company.id+"&marketplace="+this.marketTo).then((res)=>{
+              this.abstractProductsTo["configurable"]=res.data.results;
             }).catch((error)=>{
                 this.toast.error(error);
             });
-            this.axios.get("/api/abstract/multiple/?company="+this.company.id).then((res)=>{
-              this.abstractProducts["multiple"]=res.data.results;
+            this.axios.get("/api/abstract/multiple/?company="+this.company.id+"&marketplace="+this.marketTo).then((res)=>{
+              this.abstractProductsTo["multiple"]=res.data.results;
             }).catch((error)=>{
                 this.toast.error(error);
             })
-            this.axios.get("/api/abstract/bulk/?company="+this.company.id).then((res)=>{
-              this.abstractProducts["bulk"]=res.data.results;
+            this.axios.get("/api/abstract/bulk/?company="+this.company.id+"&marketplace="+this.marketTo).then((res)=>{
+              this.abstractProductsTo["bulk"]=res.data.results;
             }).catch((error)=>{
                 this.toast.error(error);
             })
-
-
-        
+        },
+        async getAbstractProductsFrom(){
+            this.axios.get("/api/abstract/simple/?company="+this.company.id+"&marketplace="+this.marketFrom).then((res)=>{
+              this.abstractProductsFrom["simple"]=res.data.results;
+            }).catch((error)=>{
+                this.toast.error(error);
+            });
+            this.axios.get("/api/abstract/configurable/?company="+this.company.id+"&marketplace="+this.marketFrom).then((res)=>{
+              this.abstractProductsFrom["configurable"]=res.data.results;
+            }).catch((error)=>{
+                this.toast.error(error);
+            });
+            this.axios.get("/api/abstract/multiple/?company="+this.company.id+"&marketplace="+this.marketFrom).then((res)=>{
+              this.abstractProductsFrom["multiple"]=res.data.results;
+            }).catch((error)=>{
+                this.toast.error(error);
+            })
+            this.axios.get("/api/abstract/bulk/?company="+this.company.id+"&marketplace="+this.marketFrom).then((res)=>{
+              this.abstractProductsFrom["bulk"]=res.data.results;
+            }).catch((error)=>{
+                this.toast.error(error);
+            })
         },
         
         filtersReset(){
@@ -984,10 +1085,7 @@ export default{
         copyToProducts(){
 
             var data={}
-            data["marketplace"]=[]
-            for(var value of Object.values(this.marketTo)){
-                data["marketplace"].push(value);
-            }
+            data["marketplace"]=this.marketTo
             data["fields"]=[]
             for(var [key,value] of Object.entries(this.copyTo)){
                 if(value){
@@ -1055,18 +1153,13 @@ export default{
 
 
     },
-    components:{
-        Sidebar,
-        Nav,CheckboxButton,RadioButton
-        
-    }
+    components:{Sidebar,HeaderNav,Footer}
 
 
     
 
 }
 </script>
-
 
 <style scoped>
 #left-col{

@@ -40,6 +40,7 @@
                                     <a class="dropdown-item" v-on:click="goTo('companies')">Aziende</a>
                                     <a class="dropdown-item" v-on:click="goTo('marketplaces')">Marketplace</a>
                                     <a class="dropdown-item" v-on:click="goTo('couriers')">Corrieri</a>
+                                    
                                     <a class="dropdown-item" href="#">Submit to live</a>
                                     <li class="divider"></li>
                                     <a class="dropdown-item" href="/users">Utenti</a>

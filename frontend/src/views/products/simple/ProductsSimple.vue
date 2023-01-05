@@ -1,223 +1,224 @@
 <template>
-    <div>
-        <Sidebar :company.sync="company" parent="products" child="simple"/>
-        <div class="main-panel">
-            <Nav :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" />
-            <div class="center" v-if="marketplace" style="overflow-y:scroll">
-                <div class="container-fluid">
-                    <div class="col-12 row">
-                        <div class="col-2">
-                            <h5 style="font-size:25px;">Prodotti semplici</h5>
-                        </div>
-                        <div class="col-6">
-                            <a :href="'/product/new/?company='+this.company.id" class="btn btn-success">Nuovo</a>
-                        </div>
-                        <div class="col-4" v-if="marketplace" style="text-align:right">
-                                <img class="me-2 thumbnails" :src="marketplaceImg" />
-                                <b>Sei in {{marketplace._code}} {{marketplace._country}}</b>
-                        </div>
-                        <div class="col-12" style="background-color: var(--warning);">
-                            <div class="row">
-                                <div class="col-3 p-2">
-                                    <b>Cambia Marketplace</b>
-                                    <select class="custom-select ml-2" v-on:change="changeMarketplace($event)">
-                                            <option :selected="market.id==this.marketplace.id" v-for="(market,key) in this.marketplaces" :key="key" :value="market.id">{{market._code}} - {{market._country}}</option>
-                                    </select>
-                                </div>
-                                <div class="col-4 p-2 row m-auto">
-                                    <label class="pt-2 pr-2"><b>Cerca</b></label><input type="text" class="form-control" style="width:70%" placeholder="Cerca per sku,gtin,title,descrizione,ecc..." v-on:keyup="sendSearch()" v-model="this.search">
-                                </div>
-                                <div class="col-3 p-2" style="text-align:right"><label class="mr-2"><b>Visualizza prodotti (n.)</b></label>
-                                    <select class="custom-select mr-2" v-on:change="this.page=1; this.limit=$event.target.value; this.getProducts();">
-                                        <option value="20">20</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                        <option value="200">200</option>
-                                    </select>
-                                </div>
+   <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
 
-                            </div>
+
+        <div class="content__header content__boxed overlapping">
+            <div class="content__wrap">
+
+                    <!-- Page title and information -->
+                    <h1 class="page-title mb-2">Prodotti Semplici</h1>
+                    <h2 class="h5">Lista delle schede prodotti semplici</h2>
+                    <p></p>
+                    <!-- END : Page title and information -->
+            </div>
+        </div>
+        <div class="content__boxed">
+            <div class="content__wrap">
+                <div class="row p-2 bg-light">
+                    <div class="col-12 d-md-flex justify-content-md-end">
+                        <a :href="'/product/new/?company='+this.company.id" class="btn btn-success">Nuovo</a>
+
+                    </div>
+                </div>
+                <template v-if="this.marketplace">
+                    <div class="row p-2 bg-light">
+                        <div class="col-4">
+                            <img class="me-2 " :src="marketplaceImg" width="30"/>
+                            <b>Sei in {{marketplace._code}} {{marketplace._country}} - ({{marketplace.account}})</b>
                         </div>
                     </div>
-                        <div class="col-12 mt-4 pt-4" v-if="loading"><span class="spinner-border  text-warning" role="status"></span></div>
+                    <div class="row p-2 bg-light">
+                        <div class="col-3 m-auto ms-0">
+                            <b>Cambia Marketplace</b>
+                            <select class="form-select ml-2" v-on:change="changeMarketplace($event)">
+                                <option :selected="market.id==this.marketplace.id" v-for="(market,key) in this.marketplaces" :key="key" :value="market.id">{{market._code}} - {{market._country}} - {{market.account}}</option>
+                            </select>
+                        </div>
+                        <div class="col-4 m-auto">
+                            <b>Cerca</b>
+                            <div class="input-group">
+                                <input type="text" class="form-control"  placeholder="Cerca per sku,gtin,title,descrizione,ecc..." v-on:keyup.enter="this.sendSearch()" v-model="this.search">
+                                <div class="input-group-append"><button class="btn btn-primary" v-on:click="this.sendSearch()">Cerca</button></div>
+                            </div>
+                            
+                        </div>
+                        <div class="col-4 m-auto me-0">
+                            <b>Visualizza prodotti (n.)</b>
+                            <select class="form-select mr-2" v-on:change="this.offset=0; this.limit=$event.target.value; this.getProducts().then(this.getProductsCategories).then(this.getAttributes);">
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                            </select>
+                        </div>
+                    </div>
+                </template>
                         
-                            <div class="row mt-4 pt-4">
-                                <div class="col-3" style="text-align:left"><a href="#" v-on:click="selectAllProducts(true)" style="color:var(--success);"><i><b>Seleziona tutti</b></i></a><a href="#" v-on:click="selectAllProducts(false)" style="color:var(--danger);"><b><i> / </i></b><i><b>Deseleziona tutti</b></i></a></div>
-                                <div class="col-6"><ul class="col-12 row" ><template v-for="field,key in this.fields" :key="key"><li class="col-4" style="display: inline;" v-if="field.name!='ID' && field.name!='SKU' && field.name!='Tipo'"><span><input class="mr-2" type="checkbox" v-model="field.show">{{field.name}}</span></li></template></ul></div>
-                                <div class="col-3 text-right">
-                                    <button class="pb-1 btn" v-if="this.previous" v-on:click="this.page--; this.getProducts()">&lt;&lt;</button>
-                                    <b class="m-2">Pagina {{this.page}} </b>
-                                    <button class="pb-1 btn " v-if="this.next" v-on:click="this.page++; this.getProducts()">&gt;&gt;</button>
+                    <div class="row p-2 bg-light mt-1">
+                                <div class="col-3 m-auto">
+                                    <div class="m-auto mb-4 d-md-flex justify-content-md-start">
+                                        <b class="p-2">Prodotti </b>
+                                        <button class="pt-1 pb-0 btn btn-primary" v-if="this.previous" v-on:click="this.offset=this.offset-this.limit; this.getProducts().then(this.getProductsCategories).then(this.getAttributes)">&lt;&lt;</button>
+                                        <b class="m-2">{{parseFloat(this.offset)+1}} - {{parseFloat(this.offset)+parseFloat(this.limit)}}</b>
+                                        <button class="pt-1 pb-0 btn btn-primary" v-if="this.next" v-on:click="this.offset=this.offset+this.limit; this.getProducts().then(this.getProductsCategories).then(this.getAttributes)">&gt;&gt;</button>
+                                    </div>
+                                    <div>
+                                        <span v-if="nselected>0" style="color:red;">{{nselected}} di {{count}} Selezionati</span><span v-else>{{nselected}} di {{count}} Selezionati </span><br/>
+                                        <a href="#" v-on:click="selectAllProducts(true)"><i><b>Seleziona visibili</b></i></a><span class="p-2"><i><b>/</b></i></span><a href="#" v-on:click="selectAllProducts(false)"><i><b>Deseleziona visibili</b></i></a><span class="p-2"><i><b>/</b></i></span><a href="#" v-on:click="this.deSelectAllProducts(false)"><i><b>Deseleziona tutti</b></i></a>
+
+                                    </div>
+                                </div>
+                                <div class="col-4"><ul class="col-12 row" ><template v-for="field,key in this.fields" :key="key"><li class="col-4" style="display: inline;" v-if="field.name!='ID' && field.name!='SKU' && field.name!='Tipo'"><span><input class="mr-2" type="checkbox" v-model="field.show">{{field.name}}</span></li></template></ul></div>
+                                <div class="row col-5 m-auto">
+                                    <div class="col-7">
+                                        Azioni
+                                        <select class="form-select ml-2" v-model="this.actionToDo">
+                                            <option value="duplicate">Crea in</option>
+                                            <option value="delete">Elimina</option>
+                                        </select>
+                                        <select v-if="this.actionToDo=='duplicate'" class="form-select ml-2" v-model="this.actionMarket">
+                                            <template v-for="(market,key) in this.marketplaces" :key="key">
+                                                <option v-if="market.id!=this.marketplace.id" :value="market.id">{{market._code}} - {{market._country}} - {{market.account}}</option>
+                                            </template>
+                                        </select>                         
+                                    </div>
+                                    <div class="col-3 m-auto">
+                                        <button class="btn btn-primary" v-on:click="this.doAction()">Esegui</button>
+                                    </div>
                                 </div>
                                 
-                            </div>
+                                <hr/>
+                    </div>
+                    <div class="row p-2 bg-light">
                         <table v-if="products && !loading" class="table table-borderless table-striped table-hover table-sm">
                             <thead>
                                 <tr><th></th><th v-for="(field,key) in fields" :key="key" v-show="field.name!=='ID' && field.show">{{field.name}}</th><th></th></tr>    
                             </thead>
                             <tbody>
                                 <tr v-for="(product,index) in products" :key="index">
-                                    <td><input :id="'check'+product.id" type="checkbox" v-on:change="checkbox(product.id,$event)" v-model="checkboxSelected[product.id]"></td>
-                                    <td v-for="(field,key) in fields" :key="key" v-show="key!='id' && field.show"><template v-if="key=='sku'"><b>{{product[key]}}</b></template><template v-else>{{product[key]}}</template></td>
-                                    <td><a class="btn btn-info" :href="'/product/simple/?company='+this.company.id+'&marketplace='+this.marketplace.id+'&id='+product.id"><i class="fa fa-eye"></i></a></td>
+                                    <td>
+                                        <input :id="'check'+product.id" type="checkbox" v-on:change="checkbox(product.id,$event)" v-model="checkboxSelected[product.id]">
+                                    </td>
+                                    <td v-show="fields['sku'].show">
+                                        <b v-if="'sku' in product">{{product['sku']}}</b>
+                                    </td>
+                                    <td v-show="fields['productType'].show">
+                                        <template v-if="'productType' in product">{{product['productType']}}</template>
+                                    </td>
+                                    <td v-show="fields['item'].show">
+                                        <template v-if="product['item']!=null"><a :href="'/item/?id='+product['item'].id+'&company='+this.company.id">{{product['item'].item_code}}</a><br/>{{product['item'].name}} </template>
+                                    </td>
+                                    <td v-show="fields['inStockQty'].show">
+                                        <template v-if="product['item']!=null">{{product['inStockQty']}}</template>
+                                    </td>
+                                    <td v-show="fields['category'].show">
+                                        <template v-if="'category' in product">{{product['category'].title}}<br/><small>{{product['category'].name}}</small></template>
+                                    </td>
+                                    <td v-show="fields['gtin'].show">
+                                        <template v-if="'gtin' in product">{{product['gtin']}}</template>
+                                    </td>
+                                    <td v-show="fields['brand'].show">
+                                        <template v-if="'brand' in product">{{product['brand']}}</template>
+                                    </td>
+                                    <td v-show="fields['title'].show">
+                                        <template v-if="'title' in product">{{this.calculate(product['title'],product)}}</template>
+                                    </td>
+                                    <td v-show="fields['short_description'].show">
+                                        <template v-if="'short_description' in product">{{this.calculate(product['short_description'],product)}}</template>
+                                    </td>
+                                    <td v-show="fields['description'].show" style="max-width:500px;">
+                                        <template v-if="'description' in product"><code>{{this.calculate(product['description'],product)}}</code></template>
+                                    </td>
+                                    <td v-show="fields['keywords'].show">
+                                        <template v-if="'keywords' in product">{{this.calculate(product['keywords'],product)}}</template>
+                                    </td>
+                                    <td v-show="fields['bullet_point'].show">
+                                        <ol class="m-0 p-0">
+                                            <li v-if="'bullet_point1' in product">{{this.calculate(product['bullet_point1'],product)}}</li>
+                                            <li v-if="'bullet_point2' in product">{{this.calculate(product['bullet_point2'],product)}}</li>
+                                            <li v-if="'bullet_point3' in product">{{this.calculate(product['bullet_point3'],product)}}</li>
+                                            <li v-if="'bullet_point4' in product">{{this.calculate(product['bullet_point4'],product)}}</li>
+                                            <li v-if="'bullet_point5' in product">{{this.calculate(product['bullet_point5'],product)}}</li>
+                                            <li v-if="'bullet_point6' in product">{{this.calculate(product['bullet_point6'],product)}}</li>
+                                            <li v-if="'bullet_point7' in product">{{this.calculate(product['bullet_point7'],product)}}</li>
+                                            <li v-if="'bullet_point8' in product">{{this.calculate(product['bullet_point8'],product)}}</li>
+                                        </ol>
+                                    </td>
+                                    <td v-show="fields['images'].show">
+                                        <span class="d-flex flex-row">
+                                            <img title="Immagine principale" class="p-1" v-if="'image0' in product"  width="30" height="30" :src="product['image0']"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                            <img class="p-1" v-if="'image1' in product"  width="30" height="30" :src="product['image1']"/><img v-else src="" width="30"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                            <img class="p-1" v-if="'image2' in product"  width="30" height="30" :src="product['image2']"/><img v-else src="" width="30"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                            <img class="p-1" v-if="'image3' in product"  width="30" height="30" :src="product['image3']"/><img v-else src="" width="30"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                            <img class="p-1" v-if="'image4' in product"  width="30" height="30" :src="product['image4']"/><img v-else src="" width="30"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                            <img class="p-1" v-if="'image5' in product"  width="30" height="30" :src="product['image5']"/><img v-else src="" width="30"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                            <img class="p-1" v-if="'image6' in product"   width="30" height="30" :src="product['image6']"/><img v-else src="" width="30"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                            <img class="p-1" v-if="'image7' in product"  width="30" height="30" :src="product['image7']"/><img v-else src="" width="30"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                            <img title="Miniatura" class="p-1" v-if="'image8' in product"  width="30" height="30" :src="product['image8']"/><img v-else src="/src/assets/img/uploads/no-image.png" width="30"/>
+                                        </span>
+                                    </td>
+                                    <td v-show="fields['attributes'].show">
+                                        <template v-if="'category' in product" v-for="(attribute,key) in product.category.attributes" :key="key">
+                                            <ul class="m-0 p-0">
+                                                <li v-if="attribute.name in product">
+                                                    <template v-if="attribute.type != 'DECIMAL'">
+                                                        {{attribute.description}} {{product[attribute.name]}}
+                                                    </template>
+                                                    <template v-else>
+                                                        {{attribute.description}} {{product[attribute.name].value}} {{product[attribute.name].unit}}
+                                                    </template>
+                                                </li>
+                                            </ul>
+                                        </template>
+                                    </td>
+                                    <td><a class="btn btn-primary" title="Vedi/Modifica" :href="'/product/simple/?company='+this.company.id+'&marketplace='+this.marketplace.id+'&id='+product.id">Vedi</a></td>
                                 </tr>
                             </tbody>
                         </table>
-                </div>
-            </div>
-            <div class="right">
-                <div>
-                    <Transition name="slide-fade">
-                        <div id="left-col" class="mt-5" v-if="filter || varie">
-                            
-                            
-                            <div v-if="varie">
-                                <h5><b>Applica azione</b></h5>
-                                 
-                                <div class="p-4"><CheckboxButton :ison.sync="checkboxAllMarketplace" @update:ison="(n) => checkboxAllMarketplace=n"/><b class="pl-2">Per tutti i marketplaces</b>
-                                    <br>oppure<br>
-
-                                
-                                
-                                    <b>seleziona il marketplace</b>
-                                    <select class=" custom-select" v-model="checkboxMarketplace" :disabled="checkboxAllMarketplace">
-                                        <option v-for="(value,key) in marketplaces" :key="key" :value="value.id">{{value._code}} - {{value._country}}</option>
-                                    </select>
-                                </div>
-                                <p><button class="mr-2 btn btn-outline-warning" v-on:click="shutdownProducts()">Disattiva</button><button  class="btn btn-danger" v-on:click="deleteProducts()">Elimina</button></p>
-                                
-                            </div>
-
-                            <div v-if="filter">
-                                <h5><b>Filtri</b></h5>
-                                <p>
-                                    <table  class="m-auto">
-                                        <tr>
-                                            <td>
-                                                <CheckboxButton :ison.sync="filters.sku.active" @update:ison="(n) => filters.sku.active=n"/>
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control" v-model="filters.sku.value" placeholder="Sku">
-                                            </td>
-                                            <td>
-                                                <select class="custom-select" v-model="filters.sku.action">
-                                                    <option value="==">Uguale</option>
-                                                    <option value="<>">Diverso</option>
-                                                    <option value="cc">Contiene</option>
-                                                    <option value="nc">Non contiene</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <CheckboxButton :ison.sync="filters.title.active" @update:ison="(n) => filters.title.active=n"/>
-                                            </td>
-                                            <td><input type="text" class="form-control" v-model="filters.title.value" placeholder="Titolo"></td>
-                                            <td>
-                                                <select class="custom-select" v-model="filters.title.action">
-                                                    <option value="==">Uguale</option>
-                                                    <option value="<>">Diverso</option>
-                                                    <option value="cc">Contiene</option>
-                                                    <option value="nc">Non contiene</option>
-                                                </select>
-                                            </td>
-                                            
-                                        </tr>
-                                        <tr>
-                                            <td><CheckboxButton :ison.sync="filters.description.active" @update:ison="(n) => filters.description.active=n"/></td>
-                                            <td><input type="text" class="form-control" v-model="filters.description.value" placeholder="Descrizione"></td>
-                                            <td>
-                                                <select class="custom-select" v-model="filters.description.action">
-                                                    <option value="cc">Contiene</option>
-                                                    <option value="nc">Non contiene</option>
-                                                </select>
-                                            </td>
-                                            </tr>
-                                        <tr>
-                                            <td><CheckboxButton :ison.sync="filters.short_description.active" @update:ison="(n) => filters.short_description.active=n"/></td>
-                                            <td><input type="text" class="form-control" v-model="filters.short_description.value" placeholder="Descrizione breve"></td>
-                                            <td>
-                                                <select class="custom-select" v-model="filters.short_description.action">
-                                                    <option value="cc">Contiene</option>
-                                                    <option value="nc">Non contiene</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><CheckboxButton :ison.sync="filters.images.active" @update:ison="(n) => filters.images.active=n"/></td>
-                                            <td colspan="2">
-                                                <select class="custom-select" v-model="filters.images.value">
-                                                    <option value="true">Contiene immagini</option>
-                                                    <option  value="false">Non contiene immagini</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><CheckboxButton :ison.sync="filters.attributes.active" @update:ison="(n) => filters.attributes.active=n"/></td>
-                                            <td colspan="2">
-                                                <select class="custom-select form-control" v-model="filters.attributes.value" multiple >
-                                                    <option v-for="(val,key) in attributes" :key="key" :value="val.name">{{val.description}}</option>
-                                                </select>
-                                                <span style="font-size:12px">Usa il tasto <b>CTRL</b> per selezioni multiple</span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </p>
-                                
-                                <button v-on:click="filtersReset()" type="button" class="mr-2 btn btn-outline">Reset</button><button type="button" v-on:click="getProducts(marketplaceKey)" class="btn btn-warning ml-2">Filtra</button>
-                            </div>
-
-
-                        </div>
-                    </Transition>
-                    <div class="pt-5" v-if="marketplace">
-                        <div class="p-2"><b>Azioni</b></div>
-                        
-                        
-                        <hr>
-                        
-                        <ul class="nav nav-pills flex-column">
-                            <li class="nav-item"><button class="btn btn-outline" :class="{ active : filter  }" v-on:click="expand('filter')"  title="Filtri"><span class="material-icons">filter_alt</span></button></li>
-                        </ul>
-                        <hr>
-                        <ul class="nav nav-pills flex-column">
-                            <li class="nav-item"><button class="btn btn-outline" :class="{ active : varie  }" v-on:click="expand('varie')" title="Varie"><span class="material-icons">build</span></button></li>
-                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
+            
+        <Footer/>
+        </section>
+            
+
+        <HeaderNav :company.sync="company" :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="products" child="simple" @update:collapse="(collapse=false)"/>
     </div>
-    
 </template>
 
 <script>
 
 import Sidebar from "../../../components/Sidebar.vue";
-import CheckboxButton from "../../../components/CheckboxButton.vue";
-import RadioButton from "../../../components/RadioButton.vue";
-import Nav from "../../../components/Nav.vue";
+import HeaderNav from "../../../components/HeaderNav.vue";
+import Footer from "../../../components/Footer.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
 
             listStage:true,
 
-
+            actionToDo:null,
+            actionMarket:null,
             products:[],
             fields: {
                 id: { name :"ID",show:false },
                 sku:{ name :"SKU",show:true },
                 productType: {name :"Tipo",show:true},
+                item:{name:"Associato a ",show:true},
+                inStockQty:{name:"Qtà disponibile",show:true},
+                category:{name:"Categoria",show:true},
                 gtin:{name :"GTIN",show:true},
                 brand:{name :"Marca",show:true},
                 title:{name :"Titolo", show:true},
-                short_description:{ name:"Descrizione Breve",show:false},
+                short_description:{ name:"Descrizione Breve",show:true},
                 description: { name :"Descrizione",show:false},
+                keywords:{name :"Parole chiave",show:true},
+                bullet_point:{name :"Punti di forza",show:false},
                 images:{name :"Immagini",show:false},
-                keywords:{name :"Parole chiave",show:false},
-                bullet_point:{name :"Punti di forza (Bullet Point)",show:false},
-                attributes:{name :"Attributi",show:true},
+                attributes:{name :"Attributi",show:false},
             },
             marketplaces:[],
             marketplaceKey:"",
@@ -237,7 +238,7 @@ function initialState (){
                 bullet_point:{name :"Punti di forza (Bullet Point)",show:false},
                 attributes:{value:[], active:false}
             },
-            attributes:[],
+            collapse:false,
             company:{},
             companies:[],
 
@@ -253,7 +254,7 @@ function initialState (){
 
             count:null,
             limit:20,
-            page:1,
+            offset:0,
             previous:null,
             next:null,
             
@@ -277,12 +278,75 @@ export default{
         this.init();
     },
     computed:{
-        
+            nselected(){
+                var i=0;
+                for(var [key,obj] of Object.entries(this.checkboxSelected)){
+                    if(obj){
+                        i++;
+                    }
+                }
+                return i;
+            }
         
         },
 	methods:{
+        async getProductsCategories(){
+            for(let i=0;i<this.products.length;i++){
+                await this.axios.get("/api/products/categories/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&simple="+this.products[i].id).then((res)=>{
+                    if(res.data.results.length>0){
+                        this.products[i]["category"]=res.data.results[0];
+                        
+                    }
+             
+                }).catch((error)=>{
+                    this.toast.error(error);
+                })
+            }
+            this.loading=false;
+        },
+        calculate(text,product){
+           
+            if(product.category!=null){
+                if("attributes" in product.category){
+                    for(var i=0;i<product.category.attributes.length;i++){
+                        let search=product.category.attributes[i].name
+                        let type=product.category.attributes[i].type
+                        let value=""
+                        let unit=""
+                        if(type=="DECIMAL"){
+                            if(search in product){
+                                value=product[search]["value"]
+                                unit=product[search]["unit"]
+                            }
+                        }
+                        else{
+                            value=product[search]
+                        }
+                        if(value==undefined){
+                            value="";
+                        }
+                        var re=new RegExp("%"+search+"%",'g')
+                        text=text.replace(re,value)
+                        if(type=="DECIMAL"){
+                            var reUnit=new RegExp("%"+search+"_unit%",'g')
+                            text=text.replace(reUnit,unit)
+                        }
+                        if((type=="TEXT" || type=="CHAR") && value!=""){
+                            var reUpper=new RegExp("%"+search.toUpperCase()+"%",'g')
+                            var reTitled=new RegExp("%"+search[0].toUpperCase()+search.slice(1)+"%",'g')
+                            text=text.replace(reUpper,value.toUpperCase())
+                            text=text.replace(reTitled,value[0].toUpperCase()+value.slice(1))            
+                        }
+                    
+                    }
+                    return text
+                }
+            }
+            return text
+            
+        },
         async init(){
-            this.getCompanies().then(this.getMarketplaces).then(this.getProducts).then(this.getAttributes)
+            this.getCompanies().then(this.getMarketplaces).then(this.getProducts).then(this.getProductsCategories).then(this.getAttributes)
         },
         async getCompanies(){
             try{
@@ -366,33 +430,35 @@ export default{
                 }
             
             try{
-                const res = await this.axios.get("/api/products/simple/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&page="+this.page+"&limit="+this.limit+"&search="+this.search).then((res) => {
+                const res = await this.axios.get("/api/products/simple/?company="+this.company.id+"&marketplace="+this.marketplace.id+"&offset="+this.offset+"&limit="+this.limit+"&search="+this.search).then((res) => {
                     this.products=[]
+                    if(res.data.next){
+                        this.next=res.data.next;
+                    }
+                    else{
+                        this.next=false;
+                    }
+                    if(res.data.previous){
+                        this.previous=res.data.previous;
+                    }
+                    else{
+                        this.previous=false;
+                    }
+                    this.count=res.data.count;
                     for(var i=0; i<res.data.results.length; i++){
-                        if(res.data.next){
-                            this.next=this.page+1;
-                        }
-                        else{
-                            this.next=false;
-                        }
-                        if(res.data.previous){
-                            this.previous=this.page-1;
-                        }
-                        else{
-                            this.previous=false;
-                        }
-                        this.count=res.data.count;
                         var obj=res.data.results[i];
                         var product = {
                             "id":obj.id,
                             "sku":obj.sku,
                             "productType":"Semplice",
                             "gtin":obj.gtin,
-                            "gtin_type":obj.gtin_type
+                            "gtin_type":obj.gtin_type,
+                            "item":obj.item,
+                            "inStockQty":obj.inStockQty
                         }
                         for(var k=0; k<obj.text_eav.length;k++){
                             if(obj.text_eav[k].marketplace==this.marketplace.id){
-                                product[obj.text_eav[k].attribute]=obj.text_eav[k].value.substring(0,200);
+                                product[obj.text_eav[k].attribute]=obj.text_eav[k].value;
                             }
                         }
                         for(var k=0; k<obj.int_eav.length;k++){
@@ -407,7 +473,9 @@ export default{
                         }
                         for(var k=0; k<obj.decimal_eav.length;k++){
                             if(obj.decimal_eav[k].marketplace==this.marketplace.id){
-                                product[obj.decimal_eav[k].attribute]=obj.decimal_eav[k].value;
+                                product[obj.decimal_eav[k].attribute]={}
+                                product[obj.decimal_eav[k].attribute]["value"]=obj.decimal_eav[k].value
+                                product[obj.decimal_eav[k].attribute]["unit"]=obj.decimal_eav[k].unit
                             }
                         }
                         for(var k=0; k<obj.boolean_eav.length;k++){
@@ -425,7 +493,7 @@ export default{
                     if(this.products.length==0){
                         this.listStage=false;
                     }
-                    this.loading=false;
+                    
                 });
             }
             catch(error){
@@ -434,19 +502,7 @@ export default{
         }
             
         },
-        async getAttributes(){
-            try {
-                const res = await this.axios.get("/api/products/attributes/?company="+this.company.id)
-                this.attributes=res.data.results;
-            } catch (error) {
-                if(error.response!=null){
-                    this.toast.error(error.response.data.detail);
-                }
-                else{
-                    this.toast.error("Errore indefinito");
-                }
-            }
-        },
+        
         changeCompany(key){
             
             window.location.href='/products/simple?company='+this.companies[key].id;
@@ -486,110 +542,95 @@ export default{
         shutdownProducts(){
 
         },
-        deleteProducts(){
-            var url=null;
-            if(this.checkboxAllMarketplace){
-                url="/api/products/delete/?company="+this.company.id+"&type=S";
-            }
-            else{
-                url="/api/products/delete/?company="+this.company.id+"&type=S&marketplace="+this.checkboxMarketplace;
-            }
-            this.axios.post(url,this.checkboxSelected).then((res) => {
-                this.toast.success("Prodotto eliminato")
-                this.checkboxSelected={};
-                this.getProducts();
-            }).catch((error)=>{
-                this.toast.error(error.response.detail)
-                this.getProducts();
-            })
-            
-        },
         checkbox(id,event){
             this.checkboxSelected[id]=event.target.checked;
             if(event.target.checked==false){
                 delete(this.checkboxSelected[id])
             }
         },
-
+        
         selectAllProducts(value){
             for(var i=0; i<this.products.length;i++){
                 this.checkboxSelected[this.products[i].id]=value;
+            }
+        },
+        deSelectAllProducts(){
+            for(var key of Object.keys(this.checkboxSelected)){
+                delete(this.checkboxSelected[key])
+            }
+        },
+        
+        sendSearch(){
+            if(this.search.length==0 || this.search.length>2){
+                this.getProducts().then(this.getProductsCategories).then(this.getAttributes)
+            }
+        },  
+        
                 
+        async doAction(){
+            var id_list=[]
+            for(var [id,value] of Object.entries(this.checkboxSelected)){
+                if(value==true){
+                    id_list.push(parseInt(id))
+                }
+            }
+            if(this.actionToDo=="duplicate"){
+                var success=[]
+                var errors=[]
+                
+                for(var [key,product] of Object.entries(this.products)){
+                    if(id_list.includes(product.id)){
+                        var data={}
+                        data["sku"]=product.sku
+                        data["gtin"]=product.gtin
+                        data["gtin_type"]=product.gtin_type
+                        
+                        
+                        
+                        await this.axios.post("/api/products/simple/?company="+this.company.id+"&marketplace="+this.actionMarket,data).then((res)=>{
+                            success.push("Prodotto "+product.sku+ " creato!")
+                        }).catch((error)=>{
+                            errors.push(error.response.data.detail)
+                        })
+                        
+                        
+                    }
+                }
+                if(success.length>0){
+                    var messageS=""
+                    for(var i=0;i<success.length;i++){
+                        messageS+=success[i]+"\n"
+                    }
+                    this.toast.success(messageS)
+                }
+                if(errors.length>0){
+                    var messageE=""
+                    for(var i=0;i<errors.length;i++){
+                        messageE+=errors[i]+"\n"
+                    }
+                    this.toast.error(messageE)
+                }
+            }
+            else if(this.actionToDo=="delete"){
+                for(var i=0;i<id_list.length;i++){
+                    await this.axios.delete("/api/products/simple/"+id_list[i]+"/?company="+this.company.id+"&marketplace="+this.marketplace.id).then((res)=>{
+                        this.toast.success("Prodotti eliminati")
+                    }).catch((error)=>{
+                        this.toast.error(error);
+                    })
 
+                }
+                this.checkboxSelected={}
+                this.getProducts().then(this.getProductsCategories).then(this.getAttributes)
             }
         },
 
-        sendSearch(){
-            if(this.search.length==0 || this.search.length>2){
-                this.getProducts();
-            }
-            
-            
-        },  
-        
-
-
 
     },
-    components:{
-        Sidebar,
-        Nav,CheckboxButton,RadioButton
-        
-    }
+    components:{Sidebar,HeaderNav,Footer}
 
 
     
 
 }
 </script>
-<style scoped>
-
-#left-col{
-    position:fixed;
-    width:400px;
-    right:var(--right-width);
-    
-  padding: 10px ;
-    color: rgb(26, 26, 26);
-    min-height:100px;
-
-  background:
-    linear-gradient(white, white) padding-box,
-    linear-gradient(to right, #FFA534, #FFA534) border-box;
-    
-  border-right : 5px solid transparent;
-  border-left : 5px solid transparent;
-  border-top : 1px solid transparent;
-  border-bottom : 1px solid transparent;
-  
-
-        }
-
-td{
-    padding:5px 5px 5px 5px;
-}
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(500px);
-  opacity: 0;
-}
-.z-9{
-    z-index:999999;
-}
-.table-striped tbody tr:nth-of-type(odd) {
-    border-top: 1px solid var(--warning);
-    border-bottom: 1px solid var(--warning);
-}
-.table-striped tbody tr:hover {
-    
-    background-color:var(--warning);
-}
-</style>

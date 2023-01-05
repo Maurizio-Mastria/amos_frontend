@@ -1,15 +1,21 @@
 <template>
-    <div>
-        <Sidebar parent="dashboard" />
-        
-        <div class="main-panel">
-            <!-- Navbar -->
-            <Nav/>
-            <!-- End Navbar -->
-            <div class="center">
-                <div class="container-fluid">
-                         
-                    <div class="row">
+    <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
+
+
+        <div class="content__header content__boxed overlapping">
+            <div class="content__wrap">
+
+                    <!-- Page title and information -->
+                    <h1 class="page-title mb-2">Utenti</h1>
+                    <h2 class="h5">Tutti gli utenti (ADMIN)</h2>
+                    <p></p>
+                    <!-- END : Page title and information -->
+            </div>
+        </div>
+        <div class="content__boxed">
+            <div class="content__wrap">
+                <div class="row">
                         <div class="col-xl-8">
                             <div class="card ">
                                 <div class="card-header">
@@ -18,8 +24,8 @@
                                             <h4 class="card-title">Utenti</h4>
                                             <p class="card-category">Tutti gli utenti</p>
                                         </div>
-                                        <div class="col-6 text-right">
-                                            <a href="/users/new/" class="btn btn-info">Aggiungi utente</a>
+                                        <div class="col-6 d-md-flex justify-content-md-end m-auto mt-0">
+                                            <a href="/users/new/" class="btn btn-primary">Aggiungi utente</a>
                                         </div>
                                     </div>
                                 </div>
@@ -39,18 +45,18 @@
                                                             <td>{{value.last_name}}</td>
                                                             <td>{{value.email}}</td>
                                                             <td>{{value.phone}}</td>
-                                                            <td>{{value.last_login}}</td>
+                                                            <td>{{value._last_login}}</td>
                                                             <td class="text-center">
-                                                                <template v-if="value.is_staff"><i title="Attivo" class="fa fa-circle text-success"></i></template>
-                                                                <template v-else><i title="Disabilitato" class="fa fa-circle text-danger"></i></template>
+                                                                <template v-if="value.is_staff"><i title="Attivo" class="bi bi-circle-fill text-success"></i></template>
+                                                                <template v-else><i title="Disabilitato" class="bi bi-circle-fill text-danger"></i></template>
                                                             </td>
                                                             <td class="text-center">
-                                                                <template v-if="value.is_active"><i title="Attivo" class="fa fa-circle text-success"></i></template>
-                                                                <template v-else><i title="Disabilitato" class="fa fa-circle text-danger"></i></template>
+                                                                <template v-if="value.is_active"><i title="Attivo" class="bi bi-circle-fill text-success"></i></template>
+                                                                <template v-else><i title="Disabilitato" class="bi bi-circle-fill text-danger"></i></template>
                                                             </td>
                                                             <td class="text-right">
-                                                                <a :href="'/user?id='+value.id+'&company='+this.company.id" rel="tooltip" class="btn btn-warning" title="Vedi profilo">
-                                                                    <i class="fa fa-user"></i>
+                                                                <a :href="'/user?id='+value.id+'&company='+this.company.id" rel="tooltip" class="btn btn-primary" title="Vedi profilo">
+                                                                    Vedi
                                                                 </a>
                                                             </td>
                                                         </tr>
@@ -69,7 +75,12 @@
                                         </div>
                                     </div>
                                     
-                                </div>
+           <Footer/>
+        </section>
+            
+
+        <HeaderNav :company.sync="company" :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="dashboard" @update:collapse="(collapse=false)"/>
     </div>
     
 </template>
@@ -77,9 +88,7 @@
 <script>
 import Sidebar from "../../components/Sidebar.vue";
 import Footer from "../../components/Footer.vue";
-// import CheckboxButton from "../components/CheckboxButton.vue";
-// import RadioButton from "../components/RadioButton.vue";
-import Nav from "../../components/Nav.vue";
+import HeaderNav from "../../components/HeaderNav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
@@ -159,12 +168,7 @@ export default{
 
 
     },
-    components:{
-        Sidebar,
-        Nav,Footer
-        // CheckboxButton,RadioButton
-        
-    }
+    components:{Sidebar,HeaderNav,Footer}
 
 
     

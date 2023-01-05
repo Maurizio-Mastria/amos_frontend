@@ -9,21 +9,32 @@
       
       <div class="container-fluid">
          <div class="row">
-            <div class="col-lg-4 col-xl-4 col-md-6 col-sm-8 mx-auto">
+            <div class="col-md-3 m-auto">
                <div v-if="!step">
                   <div v-if="!registerActive" class="card login">
-                     <h1>Log In</h1>
-                     <form onsubmit="event.preventDefault();" class="form-group">
-                        <input v-model="username" autocomplete="username" type="username" class="form-control" placeholder="Email" autofocus required>
-                        <input v-model="password" autocomplete="password" type="password" class="form-control" placeholder="Password" required>
-                        <p class="red">{{error}}</p>
-                        <input type="submit" class="btn btn-outline-success" v-on:click="doLogin()" value="Invia">
+                     <div class="card-header">
+                        <h4 class="card-title">Accedi</h4>
+                     </div>
+                     <div class="card-body">
+                        <form onsubmit="event.preventDefault();" class="row g-3">
+                           <div class="col-md-12">
+                              <label for="username">Email</label>
+                              <input id="username" v-model="username" autocomplete="username" type="username" class="form-control" placeholder="Email" autofocus required>
+                           </div>
+                           <div class="col-md-12">
+                              <label for="password">Password</label>
+                              <input id="passsword" v-model="password" autocomplete="password" type="password" class="form-control" placeholder="Password" required>
+                           </div>
+                           <p class="red">{{error}}</p>
+                           <input type="submit" class="btn btn-primary" v-on:click="doLogin()" value="Invia">
+                           
+                          
+                          <!-- <p>Non hai un account? <a href="#" @click="registerActive = !registerActive">Registrati!</a>
+                           </p>
+                           <p><a href="#">Password dimenticata?</a></p> -->
+                        </form>
                         
-                       
-                       <!-- <p>Non hai un account? <a href="#" @click="registerActive = !registerActive">Registrati!</a>
-                        </p>
-                        <p><a href="#">Password dimenticata?</a></p> -->
-                     </form>
+                     </div>
                   </div>
 
                   <!-- <div v-else class="card register" v-bind:class="{ error: emptyFields }">
@@ -40,35 +51,37 @@
                </div>
                <div v-else>
                   <div class="card login">
-                     <h1>Log In</h1>
+                     <div class="card-header">
+                        <h4 class="card-title">Accedi</h4>
+                     </div>
+                     <div class="card-body">
                      
                      
-                     
-                     <div>
-                        <a target="_blank" href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-google.png" width="30px"></a>
-                        <a target="_blank" href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-microsoft.png" width="30px"/></a>
-                        <a target="_blank" href="https://play.google.com/store/apps/details?id=com.duosecurity.duomobile&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-duo.png" width="30px"/></a>
-                        <a target="_blank" href="https://play.google.com/store/apps/details?id=ru.yandex.key&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-yandex.png" width="30px"/></a>
-                        <a target="_blank" href="https://play.google.com/store/apps/details?id=org.fedorahosted.freeotp&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-freeotp.png" width="30px"/></a>
-                        <a target="_blank" href="https://play.google.com/store/apps/details?id=com.authy.authy&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-authy.png" width="30px"/></a>
-                     </div>
+                        
+                        <div v-if="qrcode" class="mt-2 p-3">
+                           <p>Apri la tua app di autenticazione, <b>scansiona il QR CODE</b> e inserisci il codice per la verifica</p>
+                           <p><img class="mb-3" style="border:5px solid #28a745;" :src="qrcode"></p>
+                        </div>
 
-                     <div v-if="qrcode" class="mt-2 p-3">
-                        <p>Apri la tua app di autenticazione, <b>scansiona il QR CODE</b> e inserisci il codice per la verifica</p>
-                        <p><img class="mb-3" style="border:5px solid #28a745;" :src="qrcode"></p>
-
-                     </div>
-
-                     <div class="m-2">     
-                        <h5>Inserisci OTP</h5>
-                     </div>
-                     <form onsubmit="event.preventDefault();" class="form-group">
-                     <input style="text-align:center" v-model="otp_token" required  maxlength="6" min="6"  max="6" type="text" class="form-control">
-                     <input v-model="username" autocomplete="username" type="username" class="form-control" placeholder="Email" required hidden>
-                     <input v-model="password" autocomplete="password" type="password" class="form-control" placeholder="Password" required hidden>
-                     <p class="red">{{error}}</p>
-                     <input type="submit" class="btn btn-outline-success" v-on:click="doRealLogin()" value="Invia OTP">
+                     <form onsubmit="event.preventDefault();" class="row g-3">
+                        <label for="otp">Inserisci codice</label>
+                        <input style="text-align:center" v-model="otp_token" autofocus required  maxlength="6" min="6"  max="6" type="text" class="form-control" v-on:keyup="this.otp_token = this.otp_token.replace(/[^0-9]/g, ''); this.otp_token = this.otp_token.replace(/(\..*)\./g, '$1');">
+                        <input v-model="username" autocomplete="username" type="username" class="form-control" placeholder="Email" required hidden>
+                        <input v-model="password" autocomplete="password" type="password" class="form-control" placeholder="Password" required hidden>
+                        <p class="text-danger">{{error}}</p>
+                        <input type="submit" class="btn btn-primary" v-on:click="doRealLogin()" value="Invia OTP">
                      </form>
+                     <hr/>
+                     <div class="col-12 text-center">
+                        Applicazioni OTP
+                        <a title ="Google Authenticator" target="_blank" href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-google.png" width="30px"></a>
+                        <a title ="Microsoft Authenticator" target="_blank" href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-microsoft.png" width="30px"/></a>
+                        <a title ="Duo Security" target="_blank" href="https://play.google.com/store/apps/details?id=com.duosecurity.duomobile&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-duo.png" width="30px"/></a>
+                        <a title ="Yandex Authenticator" target="_blank" href="https://play.google.com/store/apps/details?id=ru.yandex.key&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-yandex.png" width="30px"/></a>
+                        <a title ="Free OTP" target="_blank" href="https://play.google.com/store/apps/details?id=org.fedorahosted.freeotp&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-freeotp.png" width="30px"/></a>
+                        <a title="Authy" target="_blank" href="https://play.google.com/store/apps/details?id=com.authy.authy&hl=it&gl=US"><img class="m-1" src="/src/assets/2fa-authy.png" width="30px"/></a>
+                     </div>
+                  </div>
                   </div>
                </div> 
             </div>

@@ -1,26 +1,30 @@
 <template>
-    <div>
-        <Sidebar :company.sync="company" parent="dashboard" />
-        
-        <div class="main-panel">
-            <!-- Navbar -->
-            <Nav />
-            <!-- End Navbar -->
-            <div class="center">
-                <div class="container-fluid">
-                         
-                    <div class="row">
-                        <div class="col-xl-12">
-                            <div class="card ">
-                                <div class="card-header">
+    <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
+
+
+        <div class="content__header content__boxed overlapping">
+            <div class="content__wrap">
+
+                    <!-- Page title and information -->
+                    <h1 class="page-title mb-2">Aziende</h1>
+                    <h2 class="h5">Stato delle tue Aziende</h2>
+                    <p></p>
+                    <!-- END : Page title and information -->
+            </div>
+        </div>
+        <div class="content__boxed">
+            <div class="content__wrap">
+                <div class="row">
+                        <div class="col-xl-12 mb-3 mb-xl-0">
+                            <div class="card h100">
+                                <div class="card-header d-flex align-items-center border-0">
                                     <div class="row">
-                                        <div class="col-6">
-                                            <h4 class="card-title">Aziende</h4>
-                                            <p class="card-category">Stato delle tue aziende</p>
-                                        </div>
-                                        <div class="col-6 text-right">
-                                            <a href="/companies/new/" v-if="this.user.is_staff" class="btn btn-info">Aggiungi azienda</a>
-                                        </div>
+                                        <div class="col-md-12 d-flex gap-1 align-items-center mb-3">
+                                    <a href="/companies/new/" v-if="this.user.is_staff" class="btn btn-primary hstack gap-2 align-self-center">
+                                        <i class="demo-psi-add fs-5"></i>
+                                         Nuova azienda</a>
+                                    </div>
                                     </div>
                                 </div>
                                 <div class="card-body ">
@@ -45,7 +49,11 @@
                                                                 <template v-if="company.active"><i class="fa fa-circle text-success"></i></template>
                                                                 <template v-else><i class="fa fa-circle text-danger"></i></template>
                                                             </td>
-                                                            <td class="text-right"><a class="btn btn-warning" title="Vedi" :href="'/company?id='+company.id">Vedi</a></td>
+                                                            <td>
+                                                                <a title="Vedi" :href="'/company?id='+company.id" type="button" class="btn btn-icon btn-primary rounded-circle">
+                                                                    <i class="bi bi-eye icon-lg fs-5"></i>
+                                                                </a>
+                                                            </td>
                                                         </tr>
                                                         
                                                     </tbody>
@@ -60,23 +68,27 @@
                     </div>
                                        
                                             
-                                        </div>
-                                    </div>
-                                    
-                                </div>
+                </div>
+            </div>
+           <Footer/>
+        </section>
+            
+
+        <HeaderNav :company.sync="company" :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="company" @update:collapse="(collapse=false)"/>
     </div>
+
     
 </template>
 
 <script>
 import Sidebar from "../../components/Sidebar.vue";
-// import Footer from "../../components/Footer.vue";
-// import CheckboxButton from "../components/CheckboxButton.vue";
-// import RadioButton from "../components/RadioButton.vue";
-import Nav from "../../components/Nav.vue";
+import HeaderNav from "../../components/HeaderNav.vue";
+import Footer from "../../components/Footer.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
+            collapse:false,
             company:{},
             companies:[],
             user:{},
@@ -110,6 +122,17 @@ export default{
                         }
                         else{
                             this.companies=res.data.results;
+                            if(this.$route.query.company){
+
+                                for(var i=0;i<this.companies.length;i++){
+                                    if(this.companies[i].id==this.$route.query.company){
+                                        this.company=this.companies[i];
+                                    }
+                                }
+                            }
+                            else{
+                                this.company=this.companies[0];
+                            }
                         }
                             
 
@@ -172,58 +195,10 @@ export default{
 
 
     },
-    components:{
-        Sidebar,
-        Nav
-        // CheckboxButton,RadioButton
-        
-    }
+    components:{Sidebar,HeaderNav,Footer}
 
 
     
 
 }
 </script>
-<style scoped>
-
-#left-col{
-    position:fixed;
-    width:400px;
-    right:var(--right-width);
-    
-  padding: 10px ;
-    color: rgb(26, 26, 26);
-    min-height:100px;
-
-  background:
-    linear-gradient(white, white) padding-box,
-    linear-gradient(to right, #FFA534, #FFA534) border-box;
-    
-  border-right : 5px solid transparent;
-  border-left : 5px solid transparent;
-  border-top : 1px solid transparent;
-  border-bottom : 1px solid transparent;
-  
-
-        }
-
-td{
-    padding:5px 5px 5px 5px;
-}
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(500px);
-  opacity: 0;
-}
-.z-9{
-    z-index:999999;
-}
-</style>

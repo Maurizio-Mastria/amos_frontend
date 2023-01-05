@@ -1,22 +1,30 @@
 <template>
-    <div>
-        <Sidebar parent="dashboard" />
-        
-        <div class="main-panel">
-            <!-- Navbar -->
-            <Nav :company.sync="this.company" :companies.sync="this.companies" @update:company="(index) => changeCompany(index)" />
-            <!-- End Navbar -->
-            <div class="top"><div class="row col-12"><div class="col-12"><a v-if="company" class="btn btn-warning" :href="'/marketplaces/?company='+this.company.id">Indietro</a></div></div></div>
-            <div class="center">
-                <div class="container-fluid">
-                    
+    <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
 
-                    <div class="row">
+
+            <div class="content__header content__boxed overlapping">
+                <div class="content__wrap">
+
+                        <!-- Page title and information -->
+                        <h1 class="page-title mb-2">Marketplace</h1>
+                        <p><br/></p>
+                        <p></p>
+                        <!-- END : Page title and information -->
+                </div>
+            </div>
+            <div class="content__boxed">
+                <div class="content__wrap">
+                    <div class="row bg-light p-2">
+                        <div class="col-12 d-md-flex justify-content-md-end m-auto">
+                            <a :href="'/marketplaces/?company='+this.company.id" class="btn btn-primary">Tutti i marketplaces</a>
+                        </div>
+                    </div>
+                    <div class="row bg-light p-2">
                         <div class="col-md-6 m-auto">
-                            <div class="card ">
+                            <div class="card p-2">
                                 <div class="card-header">
                                     <h4 class="card-title">Aggiungi un nuovo Marketplace</h4>
-                                    
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
@@ -24,11 +32,11 @@
                                             <div class="table-responsive">
                                                 <table class="table table-company">
                                                     <tbody>
-                                                        <tr><th>Account</th><td><input placeholder="L'email del tuo account" type="email" v-model="marketplace.account"/></td></tr>
+                                                        <tr><th>Account</th><td><input class="form-control" placeholder="L'email del tuo account" type="email" v-model="marketplace.account"/></td></tr>
                                                         <tr>
                                                             <th>Nazione<img v-if="marketplace.country!=null" class="ml-2" :src="'/src/assets/img/flags/'+marketplace.country+'.png'"/></th>
                                                             <td>
-                                                                <select class="custom-select" v-model="marketplace.country">
+                                                                <select class="form-select" v-model="marketplace.country">
                                                                     <option selected value="IT">Italia</option>
                                                                     <option value="DE">Germania</option>
                                                                     <option value="ES">Spagna</option>
@@ -39,7 +47,7 @@
                                                         <tr>
                                                             <th>Tipo Marketplace</th>
                                                             <td>
-                                                                <select class="custom-select" v-model="marketplace.code">
+                                                                <select class="form-select" v-model="marketplace.code">
                                                                     <option selected value="AMZ">Amazon</option>
                                                                     <option value="NVX">Nevix</option>
                                                                     <option value="EBY">Ebay</option>
@@ -56,89 +64,44 @@
                                         </div>
                                         
                                     </div>
+                                </div>
+                                <div class="card-footer">
                                     <div class="row">
-                                        <div class="col-6 text-left">
+                                        <div class="col-6">
                                             <button class="btn btn-info" v-on:click="this.$router.go(-1)">Annulla</button>
                                         </div>
-                                        <div class="col-6 text-right">
+                                        <div class="col-6 d-flex justify-content-md-end">
                                             <button class="btn btn-danger" v-on:click="this.addMarketplace()">Aggiungi</button>
                                         </div>
                                     </div>
                                     
+
+
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-7">
-                            <!-- <div class="card ">
-                                <div class="card-header ">
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <h4 class="card-title">Collaboratori</h4>
-                                        </div>
-                                        <div class="col-6 text-right">
-                                            <a :href="'/permissions/?company='+this.company.id" class="btn btn-info">Modifica permessi</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body ">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="table-responsive">
-                                                <table class="table">
-                                                    <thead>
-                                                        <tr><th>User</th><th>Nome</th><th>Cognome</th><th>Email</th><th>Tel</th><th>Ultimo login</th><th class="text-center">Stato</th><th></th></tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        
-                                                        <tr v-for="(value,key) in this.authorizations" :key="key" :value="value">
-                                                            <th>{{value.username}}</th>
-                                                            <td>{{value.first_name}}</td>
-                                                            <td>{{value.last_name}}</td>
-                                                            <td>{{value.email}}</td>
-                                                            <td>{{value.phone}}</td>
-                                                            <td>{{value.last_login}}</td> 
-                                                            <td class="text-center">
-                                                                <template v-if="value.is_active"><i title="Attivo" class="fa fa-circle text-success"></i></template>
-                                                                <template v-else><i title="Disabilitato" class="fa fa-circle text-danger"></i></template>
-                                                            </td>
-                                                            <td class="text-right">
-                                                                <a :href="'/user?id='+key+'&company='+this.company.id" rel="tooltip" class="btn btn-warning" title="Vedi profilo">
-                                                                    <i class="fa fa-user"></i>
-                                                                </a>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> -->
-                           
                         </div>
                     </div>
-                                            <div class="row">
-                                                
-                                                
+                </div>
+            </div>
+            <Footer/>
+        </section>
+            
 
-                                            </div>
-                                            
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+        <HeaderNav :company.sync="company" :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="company" @update:collapse="(collapse=false)"/>
+    </div>
     
 </template>
 
 <script>
 import Sidebar from "../../components/Sidebar.vue";
-// import CheckboxButton from "../components/CheckboxButton.vue";
-// import RadioButton from "../components/RadioButton.vue";
-import Nav from "../../components/Nav.vue";
+import HeaderNav from "../../components/HeaderNav.vue";
+import Footer from "../../components/Footer.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
-            company:null,
+    collapse:false,
+            company:{},
             companies:[],
             marketplace:{
                 company:null,
@@ -286,59 +249,9 @@ export default{
 
 
     },
-    components:{
-        Sidebar,
-        Nav
-        // CheckboxButton,RadioButton
-        
-    }
-
+    components:{Sidebar,HeaderNav,Footer}
 
     
 
 }
 </script>
-<style scoped>
-
-#left-col{
-    position:fixed;
-    width:400px;
-    right:var(--right-width);
-    
-  padding: 10px ;
-    color: rgb(26, 26, 26);
-    min-height:100px;
-
-  background:
-    linear-gradient(white, white) padding-box,
-    linear-gradient(to right, #FFA534, #FFA534) border-box;
-    
-  border-right : 5px solid transparent;
-  border-left : 5px solid transparent;
-  border-top : 1px solid transparent;
-  border-bottom : 1px solid transparent;
-}
-.table-company tr td > *{
-    
-    width:100%;
-}
-td{
-    padding:5px 5px 5px 5px;
-}
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(500px);
-  opacity: 0;
-}
-.z-9{
-    z-index:999999;
-}
-</style>

@@ -1,45 +1,51 @@
 <template>
-    <div>
-        <Sidebar parent="dashboard" />
-        
-        <div class="main-panel">
-            <!-- Navbar -->
-            <Nav />
-            <!-- End Navbar -->
-            <div class="top"><div class="row col-12"><div class="col-12"><a class="btn btn-warning" @click="this.$router.go(-1)">Indietro</a></div></div></div>
-            <div class="center">
-                <div class="container-fluid">
+     <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
+
+
+        <div class="content__header content__boxed overlapping">
+            <div class="content__wrap">
+
+                    <!-- Page title and information -->
+                    <h1 class="page-title mb-2">Aziende</h1>
+                    <h2 class="h5">Aggiungi una nuova azienda</h2>
+                    <p></p>
+                    <!-- END : Page title and information -->
+            </div>
+        </div>
+        <div class="content__boxed">
+            <div class="content__wrap">
                     
 
                     <div class="row">
-                        <div class="col-md-6 m-auto">
-                            <div class="card ">
+                        <div class="col-xl-12 mb-3 mb-xl-0">
+                            <div class="card col-md-6 m-auto">
                                 <div class="card-header">
-                                    <h4 class="card-title">Aggiungi una nuova Azienda</h4>
+                                    <h4 class="card-title">Compila i campi</h4>
                                     
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table class="table table-company">
+                                                <table class="table">
                                                     <tbody>
-                                                        <tr><th>Rag. Sociale</th><td><input type="text" v-model="company.name"/></td></tr>
-                                                        <tr><th>P.IVA</th><td><input type="text" max="20" v-model="company.vat"/></td></tr>
-                                                        <tr><th>Indirizzo</th><td><input type="text" v-model="company.address"/></td></tr>
-                                                        <tr><th>Città</th><td><input type="text" v-model="company.city"/></td></tr>
-                                                        <tr><th>CAP</th><td><input type="text" max="5" v-model="company.cap"/></td></tr>
-                                                        <tr><th>Provincia</th><td><input maxlength="2" style="text-transform:uppercase" type="text" v-model="company.province"/></td></tr>
-                                                        <tr><th>Nazione <img v-if="company.country!=null" class="ml-2" :src="'/src/assets/img/flags/'+company.country+'.png'"/></th><td>
-                                                            <select class="custom-select" v-model="company.country">
+                                                        <tr><th>Rag. Sociale</th><td><input class="form-control" type="text" v-model="newCompany.name"/></td></tr>
+                                                        <tr><th>P.IVA</th><td><input class="form-control" type="text" max="20" v-model="newCompany.vat"/></td></tr>
+                                                        <tr><th>Indirizzo</th><td><input class="form-control"  type="text" v-model="newCompany.address"/></td></tr>
+                                                        <tr><th>Città</th><td><input class="form-control" type="text" v-model="newCompany.city"/></td></tr>
+                                                        <tr><th>CAP</th><td><input class="form-control" type="text" max="5" v-model="newCompany.cap"/></td></tr>
+                                                        <tr><th>Provincia</th><td><input class="form-control" maxlength="2" style="text-transform:uppercase" type="text" v-model="newCompany.province"/></td></tr>
+                                                        <tr><th>Nazione <img v-if="newCompany.country!=null" class="ml-2" :src="'/src/assets/img/flags/'+newCompany.country+'.png'"/></th><td>
+                                                            <select class="form-select" v-model="newCompany.country">
                                                                 <option selected value="IT">Italia</option>
                                                                 <option value="DE">Germania</option>
                                                                 <option value="ES">Spagna</option>
                                                                 <option value="FR">Francia</option>
                                                             </select>
                                                         </td></tr>
-                                                        <tr><th>PEC</th><td><input type="email" v-model="company.pec"/></td></tr>
-                                                        <tr><th>SDI</th><td><input type="text" maxlength="7" v-model="company.sdi"/></td></tr>
+                                                        <tr><th>PEC</th><td><input class="form-control" type="email" v-model="newCompany.pec"/></td></tr>
+                                                        <tr><th>SDI</th><td><input class="form-control" type="text" maxlength="7" v-model="newCompany.sdi"/></td></tr>
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -104,32 +110,26 @@
                                     </div>
                                 </div>
                             </div> -->
-                           
+                        </div></div>
                         </div>
-                    </div>
-                                            <div class="row">
-                                                
-                                                
-
-                                            </div>
-                                            
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-    
+            </div>
+           <Footer/>
+        </section>
+        <HeaderNav  :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="company" @update:collapse="(collapse=false)"/>
+        
+    </div>
 </template>
 
 <script>
 import Sidebar from "../../components/Sidebar.vue";
-// import CheckboxButton from "../components/CheckboxButton.vue";
-// import RadioButton from "../components/RadioButton.vue";
-import Nav from "../../components/Nav.vue";
+import HeaderNav from "../../components/HeaderNav.vue";
+import Footer from "../../components/Footer.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
-            
-            company:{
+            collapse:false,
+            newCompany:{
                 name:null,
                 address:null,
                 city:null,
@@ -148,7 +148,9 @@ function initialState (){
                     phone:null,
                 },
                 email:null,
-            }
+            },
+            company:{},
+            companies:[],
             
         }
 }
@@ -197,7 +199,7 @@ export default{
                             this.toast.error(String(error.response.status)+" "+String(error.response.statusText))
                         }
                     })
-        }
+        },
         
         
         
@@ -212,59 +214,10 @@ export default{
 
 
     },
-    components:{
-        Sidebar,
-        Nav
-        // CheckboxButton,RadioButton
-        
-    }
+    components:{Sidebar,HeaderNav,Footer}
 
 
     
 
 }
 </script>
-<style scoped>
-
-#left-col{
-    position:fixed;
-    width:400px;
-    right:var(--right-width);
-    
-  padding: 10px ;
-    color: rgb(26, 26, 26);
-    min-height:100px;
-
-  background:
-    linear-gradient(white, white) padding-box,
-    linear-gradient(to right, #FFA534, #FFA534) border-box;
-    
-  border-right : 5px solid transparent;
-  border-left : 5px solid transparent;
-  border-top : 1px solid transparent;
-  border-bottom : 1px solid transparent;
-}
-.table-company tr td > *{
-    
-    width:100%;
-}
-td{
-    padding:5px 5px 5px 5px;
-}
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(500px);
-  opacity: 0;
-}
-.z-9{
-    z-index:999999;
-}
-</style>

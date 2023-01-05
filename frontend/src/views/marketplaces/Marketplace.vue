@@ -1,102 +1,112 @@
 <template>
-    <div>
-        <Sidebar parent="dashboard" />
-        
-        <div class="main-panel">
-            <!-- Navbar -->
-            <Nav />
-            <!-- End Navbar -->
-            <div class="top"><div class="row col-12"><div class="col-12"><a class="btn btn-warning" @click="this.$router.push('/marketplaces?company='+this.company.id)">Torna ai Marketplaces</a></div></div></div>
-            <div class="center">
-                <div class="container-fluid" v-if="this.marketplace">
-                    
+   <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
 
-                    <div class="row ">
-                        <div class="col-md-6 m-auto">
-                            <div class="card ">
-                                <div class="card-header">
-                                    <div class="row">
-                                        <div class="col-7">
-                                            <h4 class="card-title">{{this.marketplace.account}}</h4>
-                                            <p class="card-category"><b>{{this.marketplace.code}} {{this.marketplace.country}}</b></p>
+
+            <div class="content__header content__boxed overlapping">
+                <div class="content__wrap">
+
+                        <!-- Page title and information -->
+                        <h1 class="page-title mb-2">Marketplace</h1>
+                        <h2 class="h5">Stato del tuo Marketplace</h2>
+                        <p></p>
+                        <!-- END : Page title and information -->
+                </div>
+            </div>
+        <div class="content__boxed">
+            <div class="content__wrap">
+                <div class="row bg-light p-2">
+                    <div class="col-12 d-md-flex justify-content-md-end">
+                        <a class="btn btn-warning" @click="this.$router.push('/marketplaces?company='+this.company.id)">Tutti i Marketplaces</a>
+                    </div>
+                </div>
+            
+                <div class="row bg-light mt-2" v-if="this.marketplace">
+                    <div class="col-md-6 m-auto">
+                        <div class="card ">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-7">
+                                        <h4 class="card-title">{{this.marketplace.account}}</h4>
+                                        <p class="card-category"><b>{{this.marketplace.code}} {{this.marketplace.country}}</b></p>
+                                    </div>
+                                    <div class="col-5 d-md-flex justify-content-md-end m-auto">
+                                        <template v-if="user.is_staff">
+                                            <button class="btn btn-danger" v-on:click="this.setMarketplaceStatus()" v-if="marketplace.status==true">Disattiva</button>
+                                            <button class="btn btn-success" v-on:click="this.setMarketplaceStatus()" v-if="marketplace.status==false">Attiva</button>
+                                        </template>
+                                    </div>        
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr><th>Account</th><th>{{marketplace.account}}</th></tr>
+                                                    <tr><th>Tipo</th><td>{{marketplace.code}}</td></tr>
+                                                    <tr><th>Nazione</th><td>{{marketplace.country}}<img class="ml-2" :src="'/src/assets/img/flags/'+marketplace.country+'.png'"/></td></tr>
+                                                    <template v-if="!this.modify.marketplace">
+                                                        <tr><th>Sito Web</th><td>{{marketplace.website}}</td></tr>
+                                                        <tr><th>API Endpoint</th><td>{{marketplace.endpoint}}</td></tr>
+                                                        <tr><th>API User</th><td>{{marketplace.endpoint_user}}</td></tr>
+                                                        <tr><th>API Password</th><td>{{marketplace.endpoint_password}}</td></tr>
+                                                    </template>
+                                                    <template v-else>
+                                                        <tr><th>Sito Web</th><td><input class="form-control" type="url" v-model="marketplace.website"/></td></tr>
+                                                        <tr><th>API Endpoint</th><td><input type="url" class="form-control"  v-model="marketplace.endpoint"/></td></tr>
+                                                        <tr><th>API User</th><td><input type="text" class="form-control" v-model="marketplace.endpoint_user"/></td></tr>
+                                                        <tr><th>API Password</th><td><input type="text" class="form-control" v-model="marketplace.endpoint_password"/></td></tr>
+                                                    </template>
+                                                    <tr><th>Stato</th><th><template v-if="marketplace.status"><b class="bi bi-check mr-4"></b>ATTIVO</template><template v-else>NON ATTIVO</template></th></tr>
+                                                    
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        <div class="col-5 text-right">
-                                            <template v-if="user.is_staff">
-                                                <button class="btn btn-danger" v-on:click="this.setMarketplaceStatus()" v-if="marketplace.status==true">Disattiva</button>
-                                                <button class="btn btn-success" v-on:click="this.setMarketplaceStatus()" v-if="marketplace.status==false">Attiva</button>
-                                            </template>
-                                        </div>        
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-left">
+                                        <button v-if="!modify.marketplace" class="btn btn-info" v-on:click="this.modify.marketplace=!this.modify.marketplace">Modifica</button>
+                                        <button v-if="modify.marketplace" class="btn btn-info" v-on:click="this.$router.go()" >Annulla</button>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <button v-if="modify.marketplace" class="btn btn-success" v-on:click="this.saveMarketplace()">Invia modifiche</button>
                                     </div>
                                 </div>
                                 
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="table-responsive">
-                                                <table class="table">
-                                                    <tbody>
-                                                        <tr><th>Account</th><th>{{marketplace.account}}</th></tr>
-                                                        <tr><th>Tipo</th><td>{{marketplace.code}}</td></tr>
-                                                        <tr><th>Nazione</th><td>{{marketplace.country}}<img class="ml-2" :src="'/src/assets/img/flags/'+marketplace.country+'.png'"/></td></tr>
-                                                        <template v-if="!this.modify.marketplace">
-                                                            <tr><th>Sito Web</th><td>{{marketplace.website}}</td></tr>
-                                                            <tr><th>API Endpoint</th><td>{{marketplace.endpoint}}</td></tr>
-                                                            <tr><th>API User</th><td>{{marketplace.endpoint_user}}</td></tr>
-                                                            <tr><th>API Password</th><td>{{marketplace.endpoint_password}}</td></tr>
-                                                        </template>
-                                                        <template v-else>
-                                                            <tr><th>Sito Web</th><td><input type="url" v-model="marketplace.website"/></td></tr>
-                                                            <tr><th>API Endpoint</th><td><input type="url" v-model="marketplace.endpoint"/></td></tr>
-                                                            <tr><th>API User</th><td><input type="text" v-model="marketplace.endpoint_user"/></td></tr>
-                                                            <tr><th>API Password</th><td><input type="text" v-model="marketplace.endpoint_password"/></td></tr>
-                                                        </template>
-                                                        <tr><th>Stato</th><th><template v-if="marketplace.status"><i class="fa fa-circle text-success mr-4"></i>ATTIVO</template><template v-else><i class="fa fa-circle text-danger mr-4"></i>NON ATTIVO</template></th></tr>
-                                                        
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-6 text-left">
-                                            <button v-if="!modify.marketplace" class="btn btn-info" v-on:click="this.modify.marketplace=!this.modify.marketplace">Modifica</button>
-                                            <button v-if="modify.marketplace" class="btn btn-info" v-on:click="this.$router.go()" >Annulla</button>
-                                        </div>
-                                        <div class="col-6 text-right">
-                                            <button v-if="modify.marketplace" class="btn btn-success" v-on:click="this.saveMarketplace()">Invia modifiche</button>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
+                            </div>
+                            <div class="card-footer d-md-flex justify-content-md-center m-auto">
                                 <button v-if="user.is_superuser && !marketplace.status" class="btn btn-danger" v-on:click="this.deleteMarketplace()"> !!! Elimina definitivamente !!! </button>
                             </div>
                         </div>
-                        
                     </div>
-                                            <div class="row">
-                                                
-                                                
+                </div>
+            </div>
+        </div>
+        
+        <Footer/>
+    </section>
+            
 
-                                            </div>
-                                            
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+        <HeaderNav :company.sync="company" :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="company" @update:collapse="(collapse=false)"/>
+    </div>
     
 </template>
 
 <script>
 import Sidebar from "../../components/Sidebar.vue";
+import HeaderNav from "../../components/HeaderNav.vue";
 import Footer from "../../components/Footer.vue";
-// import CheckboxButton from "../components/CheckboxButton.vue";
-// import RadioButton from "../components/RadioButton.vue";
-import Nav from "../../components/Nav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
-            company:null,
-            companies:null,
+    collapse:false,
+            company:{},
+            companies:[],
             marketplace:null,
             modify:{
                 marketplace:false,
@@ -251,58 +261,10 @@ export default{
 
 
     },
-    components:{
-        Sidebar,
-        Nav,Footer
-        // CheckboxButton,RadioButton
-        
-    }
+    components:{Sidebar,HeaderNav,Footer}
 
 
     
 
 }
 </script>
-<style scoped>
-
-#left-col{
-    position:fixed;
-    width:400px;
-    right:var(--right-width);
-    
-  padding: 10px ;
-    color: rgb(26, 26, 26);
-    min-height:100px;
-
-  background:
-    linear-gradient(white, white) padding-box,
-    linear-gradient(to right, #FFA534, #FFA534) border-box;
-    
-  border-right : 5px solid transparent;
-  border-left : 5px solid transparent;
-  border-top : 1px solid transparent;
-  border-bottom : 1px solid transparent;
-  
-
-        }
-
-td{
-    padding:5px 5px 5px 5px;
-}
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(500px);
-  opacity: 0;
-}
-.z-9{
-    z-index:999999;
-}
-</style>

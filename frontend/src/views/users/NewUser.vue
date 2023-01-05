@@ -1,14 +1,17 @@
 <template>
-    <div>
-        <Sidebar parent="" />
-        
-        <div class="main-panel">
-            <!-- Navbar -->
-            <Nav />
-            <!-- End Navbar -->
-            <div class="top"><div class="row col-12"><div class="col-12"><a class="btn btn-warning" @click="this.$router.go(-1)">Indietro</a></div></div></div>
-            <div class="center">
-                <div class="container-fluid" >
+     <div id="root" class="root hd--expanded hd--sticky mn--sticky" :class="{ 'mn--max' : !collapse, 'mn--min' : collapse, }">
+        <section  class="content" id="content">
+            <div class="content__header content__boxed overlapping">
+                <div class="content__wrap">
+                    <!-- Page title and information -->
+                    <h1 class="page-title mb-2" v-if="this.company">{{this.company.name}}</h1>
+                    <h2 class="h5">{{this.company.vid}}</h2>
+                    <p></p>
+                    <!-- END : Page title and information -->
+                </div>
+            </div>
+            <div class="content__boxed">
+                <div class="content__wrap">
                     <div class="row">
                         <div class="col-md-6 m-auto">
                             <div class="card ">
@@ -41,23 +44,29 @@
                         
                     </div>
                 </div>
-            </div>
-        </div>
+    </div>
+                <Footer/>
+
+        </section>
+            
+
+        <HeaderNav :company.sync="company" :collapse.sync="collapse" @update:collapse="this.collapse=!this.collapse" />
+        <Sidebar :collapse.sync="collapse" :company.sync="company" :companies.sync="companies" @update:company="(index) => changeCompany(index)" parent="company" @update:collapse="(collapse=false)"/>
     </div>
 </template>
 
 <script>
 import Sidebar from "../../components/Sidebar.vue";
 import Footer from "../../components/Footer.vue";
-// import CheckboxButton from "../components/CheckboxButton.vue";
-// import RadioButton from "../components/RadioButton.vue";
-import Nav from "../../components/Nav.vue";
+import HeaderNav from "../../components/HeaderNav.vue";
 import { useToast } from "vue-toastification";
 function initialState (){
   return {
             user:{},
             newUser:{},
-            
+            company:{},
+            companies:[],
+            collapse:false,
         }
 }
 export default{
@@ -110,12 +119,7 @@ export default{
 
         },
 },
-    components:{
-        Sidebar,
-        Nav
-        // CheckboxButton,RadioButton
-        
-    }
+    components:{Sidebar,HeaderNav,Footer}
 
 
     
